@@ -104,16 +104,6 @@ export default function S0b_ProposalIntro() {
         <div className="snapshot-sub">Based on your recent electricity bills, here is a snapshot of your current energy situation.</div>
         <div className="stats-grid stagger-in visible">
           <div className="stat-card">
-            <div className="stat-card-label">Daily Usage</div>
-            <div className="stat-card-value accent">{dailyUsage.toFixed(1)}</div>
-            <div className="stat-card-unit">kWh / day</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-card-label">Annual Bill</div>
-            <div className="stat-card-value danger">${annualBill.toLocaleString()}</div>
-            <div className="stat-card-unit">per year</div>
-          </div>
-          <div className="stat-card">
             <div className="stat-card-label">Tariff Rate</div>
             <div className="stat-card-value solar">${tariffRate.toFixed(2)}</div>
             <div className="stat-card-unit">per kWh</div>
@@ -122,6 +112,16 @@ export default function S0b_ProposalIntro() {
             <div className="stat-card-label">Supply Charge</div>
             <div className="stat-card-value accent">${supplyCharge.toFixed(2)}</div>
             <div className="stat-card-unit">per day</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-card-label">Daily Usage</div>
+            <div className="stat-card-value accent">{dailyUsage.toFixed(1)}</div>
+            <div className="stat-card-unit">kWh / day</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-card-label">Annual Bill</div>
+            <div className="stat-card-value danger">${annualBill.toLocaleString()}</div>
+            <div className="stat-card-unit">per year</div>
           </div>
         </div>
         <div className="section-label" style={{ marginTop: 48 }}>What We Will Show You</div>

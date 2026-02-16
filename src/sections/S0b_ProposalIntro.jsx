@@ -162,14 +162,8 @@ export default function S0b_ProposalIntro() {
             <div className="roadmap-step-number">03</div>
             <div className="roadmap-step-icon">
               <svg viewBox="0 0 32 32" fill="none" stroke="url(#rmGrad)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M16 3 L16 5" />
-                <path d="M12 7 C12 5 14 3 16 3 C18 3 20 5 20 7 C20 9 18 9 18 11 L14 11 C14 9 12 9 12 7Z" />
-                <line x1="14" y1="11" x2="18" y2="11" />
-                <line x1="14" y1="14" x2="18" y2="14" />
-                <path d="M8 20 L24 20 L24 28 L8 28 Z" />
-                <line x1="12" y1="20" x2="12" y2="28" />
-                <line x1="16" y1="20" x2="16" y2="28" />
-                <line x1="20" y1="20" x2="20" y2="28" />
+                <line x1="16" y1="3" x2="16" y2="29" />
+                <path d="M21 9 C21 7 19 5 16 5 C13 5 10 7 10 9.5 C10 12 12 13 16 14 C20 15 22 16.5 22 19.5 C22 22 19 24 16 24 C13 24 10 22 10 20" />
               </svg>
             </div>
             <div className="roadmap-step-title">Your Savings</div>

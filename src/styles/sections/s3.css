@@ -1,0 +1,104 @@
+/* ============================================================
+   SECTION 3 — ADDING SOLAR
+   ============================================================ */
+
+.s3-chart-container {
+  background: var(--bg-secondary);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-lg);
+  padding: 32px 24px 20px;
+  position: relative;
+  overflow: hidden;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.s3-chart-container::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--gradient-solar);
+  opacity: 0.5;
+}
+
+.s3-chart-area {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1000 / 380;
+}
+.s3-chart-area .chart-svg { width: 100%; height: 100%; }
+
+.s3-highlight { transition: opacity 0.6s ease; }
+
+.chart-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.chart-badge.solar {
+  background: rgba(245, 166, 35, 0.1);
+  color: var(--solar);
+}
+
+.s3-legend {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+/* Stats row */
+.s3-stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+.s3-stat-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  text-align: center;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+.s3-stat-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(245, 166, 35, 0.15);
+}
+
+.stat-value.solar-color { color: var(--solar); }
+.stat-value.green { color: var(--green); }
+.stat-value.yellow { color: var(--yellow); }
+.stat-value.red { color: var(--red); }
+
+/* Insight callout */
+.s3-insight {
+  text-align: center;
+  padding: 20px 0;
+}
+.s3-insight .insight-icon { font-size: 2.5rem; margin-bottom: 20px; }
+.s3-insight .insight-big {
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 800;
+  background: var(--gradient-solar);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.1;
+  margin-bottom: 12px;
+}
+.s3-insight .insight-text {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  font-weight: 300;
+  line-height: 1.6;
+  max-width: 500px;
+  margin: 0 auto;
+}
+.s3-insight .insight-text strong { color: var(--solar); font-weight: 600; }
+
+@media (max-width: 640px) {
+  .s3-chart-container { padding: 24px 16px 16px; }
+  .s3-stats-row { grid-template-columns: 1fr 1fr; }
+}

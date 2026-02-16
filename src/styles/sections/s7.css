@@ -1,0 +1,359 @@
+/* ============================================================
+   SECTION 7 — YOUR SYSTEM
+   ============================================================ */
+
+/* Product Cards Grid */
+.s7-product-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+
+.s7-product-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  position: relative;
+  padding: 28px;
+  transition: all 0.3s ease;
+}
+.s7-product-card:hover {
+  border-color: var(--separator-hover);
+  transform: translateY(-2px);
+}
+
+/* Top accent lines */
+.s7-product-card.solar-top::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--solar), transparent 80%);
+  opacity: 0.5;
+}
+.s7-product-card.battery-top::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #388cff, transparent 80%);
+  opacity: 0.5;
+}
+
+/* Product Header */
+.s7-product-header {
+  margin-bottom: 20px;
+}
+.s7-product-brand {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 6px;
+}
+.s7-product-model {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+/* Product Illustration */
+.s7-product-illustration {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 0;
+  margin-bottom: 20px;
+}
+.s7-panel-svg,
+.s7-battery-svg {
+  width: 200px;
+  height: 220px;
+  opacity: 0.9;
+}
+
+/* Eye pulse animation */
+.s7-eye-pulse {
+  animation: s7EyePulse 1.8s ease-in-out infinite;
+}
+@keyframes s7EyePulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+/* Charge bar animation */
+.s7-charge-bar {
+  animation: s7ChargeGlow 2s ease-in-out infinite;
+}
+@keyframes s7ChargeGlow {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
+
+/* Specs Grid */
+.s7-specs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.s7-spec {
+  padding: 10px 0;
+  border-top: 1px solid var(--separator);
+}
+.s7-spec-val {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.solar-top .s7-spec-val {
+  color: var(--solar-light);
+}
+.battery-top .s7-spec-val {
+  color: #5ea8ff;
+}
+.s7-spec-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+/* Feature Pills */
+.s7-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--separator);
+}
+.s7-feature-pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--separator);
+  color: var(--text-tertiary);
+  transition: all 0.3s ease;
+}
+.s7-product-card:hover .s7-feature-pill {
+  border-color: var(--separator-hover);
+  color: var(--text-secondary);
+}
+
+/* System Stats */
+.s7-system-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.s7-sys-stat {
+  background: var(--bg-secondary);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+.s7-sys-stat:hover {
+  border-color: var(--separator-hover);
+  transform: translateY(-2px);
+}
+
+/* Energy Flow Diagram */
+.s7-flow-section {
+  background: var(--bg-secondary);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-lg);
+  padding: 40px 32px;
+  position: relative;
+  overflow: hidden;
+}
+.s7-flow-section::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--gradient-accent);
+  opacity: 0.3;
+}
+
+.s7-flow-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.s7-flow-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0;
+  position: relative;
+}
+
+.s7-flow-node-wrap {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+.s7-flow-node-wrap:first-child {
+  flex: 0 0 auto;
+}
+
+.s7-flow-connector {
+  flex: 1;
+  height: 2px;
+  min-width: 20px;
+  border-radius: 1px;
+  margin: 0 8px;
+}
+.s7-flow-connector.solar { background: linear-gradient(90deg, var(--solar), var(--accent)); }
+.s7-flow-connector.accent { background: linear-gradient(90deg, var(--accent), var(--battery)); }
+.s7-flow-connector.battery { background: linear-gradient(90deg, var(--battery), rgba(255,255,255,0.3)); }
+.s7-flow-connector:not(.solar):not(.accent):not(.battery) {
+  background: linear-gradient(90deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1));
+}
+
+.s7-flow-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 72px;
+  flex-shrink: 0;
+}
+
+.s7-flow-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--separator-hover);
+}
+.s7-flow-node.solar .s7-flow-icon {
+  background: var(--solar-subtle);
+  border-color: rgba(245,166,35,0.25);
+  box-shadow: 0 0 16px rgba(245,166,35,0.1);
+}
+.s7-flow-node.accent .s7-flow-icon {
+  background: var(--accent-subtle);
+  border-color: rgba(224,0,240,0.25);
+  box-shadow: 0 0 16px rgba(224,0,240,0.1);
+}
+.s7-flow-node.battery .s7-flow-icon {
+  background: var(--battery-subtle);
+  border-color: rgba(48,209,88,0.25);
+  box-shadow: 0 0 16px rgba(48,209,88,0.1);
+}
+
+.s7-flow-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  text-align: center;
+}
+.s7-flow-detail {
+  font-size: 0.75rem;
+  color: var(--text-quaternary);
+  text-align: center;
+}
+
+/* Guarantee Card */
+.s7-guarantee {
+  background: var(--bg-secondary);
+  border: 1px solid rgba(48, 209, 88, 0.15);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.s7-guarantee::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--gradient-battery);
+  opacity: 0.5;
+}
+.s7-guarantee-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: var(--green-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 1.5rem;
+}
+.s7-guarantee-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.s7-guarantee-text {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  font-weight: 300;
+  line-height: 1.7;
+  max-width: 600px;
+  margin: 0 auto;
+}
+.s7-guarantee-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 20px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: var(--green-bg);
+  border: 1px solid rgba(48,209,88,0.2);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--green);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .s7-product-grid { grid-template-columns: 1fr; }
+  .s7-system-stats { grid-template-columns: 1fr 1fr; }
+  .s7-specs-grid { grid-template-columns: 1fr 1fr; }
+  .s7-flow-row {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+  }
+  .s7-flow-connector { display: none; }
+  .s7-flow-section { padding: 28px 20px; }
+}
+
+@media (max-width: 480px) {
+  .s7-system-stats { grid-template-columns: 1fr; }
+  .s7-specs-grid { grid-template-columns: 1fr; }
+}

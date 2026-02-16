@@ -1,0 +1,93 @@
+/* ============================================================
+   SECTION 6 — MONEY OVER TIME
+   ============================================================ */
+
+.s6-chart-container {
+  background: var(--bg-secondary);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-lg);
+  padding: 32px 24px 20px;
+  position: relative;
+  overflow: hidden;
+}
+.s6-chart-container::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--gradient-accent);
+  opacity: 0.5;
+}
+
+.s6-chart-area { position: relative; width: 100%; aspect-ratio: 1000 / 400; }
+.s6-chart-area .chart-svg { width: 100%; height: 100%; }
+
+.s6-line-animate {
+  stroke-dasharray: 2000;
+  stroke-dashoffset: 2000;
+  animation: s6Draw 2s ease forwards;
+}
+@keyframes s6Draw { to { stroke-dashoffset: 0; } }
+
+.s6-pulse {
+  animation: s6Pulse 2s ease-in-out infinite;
+}
+@keyframes s6Pulse {
+  0%, 100% { opacity: 1; r: 6; }
+  50% { opacity: 0.6; r: 9; }
+}
+
+/* Stats */
+.s6-stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+.s6-stat-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  text-align: center;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+.s6-stat-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(224, 0, 240, 0.15);
+}
+
+/* Savings counter section */
+.s6-savings-section { text-align: center; }
+.s6-savings-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 16px;
+}
+.s6-savings-value {
+  font-size: clamp(3rem, 8vw, 5rem);
+  font-weight: 800;
+  background: var(--gradient-battery);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.1;
+  margin-bottom: 16px;
+}
+.s6-savings-context {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  font-weight: 300;
+  line-height: 1.6;
+  max-width: 540px;
+  margin: 0 auto;
+}
+.s6-savings-context .red { color: var(--red); font-weight: 600; }
+.s6-savings-context .green { color: var(--green); font-weight: 600; }
+
+@media (max-width: 640px) {
+  .s6-chart-container { padding: 24px 16px 16px; }
+  .s6-stats-row { grid-template-columns: 1fr 1fr; }
+}

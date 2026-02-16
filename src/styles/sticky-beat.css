@@ -1,0 +1,91 @@
+/* ============================================================
+   STICKY BEAT CHART — Scroll-driven narrative pattern
+   ============================================================ */
+
+.story-wrapper {
+  position: relative;
+  padding: 0 24px;
+  z-index: 1;
+}
+
+.sticky-chart {
+  position: sticky;
+  top: 80px;
+  z-index: 2;
+  padding-bottom: 20px;
+}
+
+.beat-track {
+  position: relative;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.beat-spacer {
+  min-height: 85vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+.beat-card {
+  background: rgba(13, 13, 13, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-lg);
+  padding: 36px 32px;
+  max-width: 440px;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.beat-card.active {
+  opacity: 1;
+  transform: translateY(0);
+  border-color: rgba(224, 0, 240, 0.15);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+}
+
+.beat-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.beat-time.morning { color: var(--solar); }
+.beat-time.midday { color: var(--yellow); }
+.beat-time.evening { color: var(--red); }
+.beat-time.charging { color: var(--green); }
+.beat-time.discharging { color: var(--battery-light); }
+.beat-time.overnight { color: var(--text-secondary); }
+
+.beat-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.2;
+}
+
+.beat-text {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  font-weight: 300;
+  line-height: 1.6;
+}
+
+.beat-text strong { font-weight: 600; }
+.beat-text .solar-strong { color: var(--solar); font-weight: 600; }
+.beat-text .yellow-strong { color: var(--yellow); font-weight: 600; }
+.beat-text .red-strong { color: var(--red); font-weight: 600; }
+.beat-text .green-strong { color: var(--green); font-weight: 600; }
+
+@media (max-width: 640px) {
+  .beat-card { padding: 28px 24px; margin: 0 16px; }
+  .sticky-chart { top: 20px; }
+}

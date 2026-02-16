@@ -1,0 +1,197 @@
+/* ============================================================
+   SECTION 2 — YOUR ENERGY LIFE
+   ============================================================ */
+
+.s2-chart-container {
+  background: var(--bg-secondary);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-lg);
+  padding: 32px 24px 20px;
+  position: relative;
+  overflow: hidden;
+}
+.s2-chart-container::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--gradient-accent);
+  opacity: 0.5;
+}
+
+.s2-chart-area {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1000 / 380;
+}
+.s2-chart-area .chart-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.s2-area-group {
+  opacity: 0;
+  animation: s2FadeIn 0.8s ease forwards;
+}
+@keyframes s2FadeIn {
+  to { opacity: 1; }
+}
+
+.s2-load-curve {
+  stroke-dasharray: 2000;
+  stroke-dashoffset: 2000;
+  animation: s2DrawCurve 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes s2DrawCurve {
+  to { stroke-dashoffset: 0; }
+}
+
+/* Grid & axis labels */
+.grid-line {
+  stroke: rgba(255, 255, 255, 0.04);
+  stroke-width: 1;
+}
+.y-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  fill: var(--text-tertiary);
+  text-anchor: end;
+}
+.time-marker {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  fill: var(--text-quaternary);
+  text-anchor: middle;
+}
+
+/* Tooltip */
+.s2-tooltip {
+  position: absolute;
+  background: rgba(22, 22, 22, 0.95);
+  border: 1px solid var(--separator-hover);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -100%);
+  z-index: 10;
+  backdrop-filter: blur(10px);
+  min-width: 150px;
+  transition: opacity 0.15s;
+}
+.s2-tooltip.active { opacity: 1; }
+
+.s2-tooltip .tooltip-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-tertiary);
+  margin-bottom: 6px;
+}
+.s2-tooltip .tooltip-val {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.s2-tooltip .tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  padding: 2px 0;
+}
+.s2-tooltip .tooltip-swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.s2-tooltip .tooltip-label {
+  color: var(--text-secondary);
+  flex: 1;
+}
+.s2-tooltip .tooltip-val-sm {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-primary);
+}
+.s2-tooltip .tooltip-cost {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--separator);
+}
+
+/* Legend */
+.s2-legend {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+.legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+/* Stats row */
+.s2-stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+.s2-stat-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  text-align: center;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+.s2-stat-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(224, 0, 240, 0.15);
+}
+
+/* Insight callout */
+.s2-insight {
+  text-align: center;
+  padding: 20px 0;
+}
+.s2-insight .insight-icon { font-size: 2.5rem; margin-bottom: 20px; }
+.s2-insight .insight-big {
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 800;
+  background: var(--gradient-danger);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.1;
+  margin-bottom: 12px;
+}
+.s2-insight .insight-text {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  font-weight: 300;
+  line-height: 1.6;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.s2-insight .insight-text strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .s2-chart-container { padding: 24px 16px 16px; }
+  .s2-stats-row { grid-template-columns: 1fr 1fr; }
+}

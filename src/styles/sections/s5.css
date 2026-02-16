@@ -1,0 +1,115 @@
+/* ============================================================
+   SECTION 5 — BEFORE & AFTER
+   ============================================================ */
+
+.s5-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  justify-content: center;
+}
+.s5-tab {
+  padding: 10px 24px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--separator);
+  border-radius: 60px;
+  color: var(--text-secondary);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.s5-tab:hover { border-color: var(--separator-hover); }
+.s5-tab.active {
+  color: var(--text-primary);
+  border-color: var(--tab-color);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--tab-color) 20%, transparent);
+}
+
+.s5-chart-container {
+  background: var(--bg-secondary);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-lg);
+  padding: 32px 24px 20px;
+  position: relative;
+  overflow: hidden;
+}
+.s5-chart-container::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--gradient-accent);
+  opacity: 0.5;
+}
+
+.s5-chart-area { position: relative; width: 100%; aspect-ratio: 1000 / 380; }
+.s5-chart-area .chart-svg { width: 100%; height: 100%; }
+
+.s5-cost-ticker {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 0 4px;
+}
+.s5-cost-value {
+  font-size: 2.5rem;
+  font-weight: 800;
+  transition: color 0.3s ease;
+}
+.s5-cost-value.red { color: var(--red); }
+.s5-cost-value.solar-color { color: var(--solar); }
+.s5-cost-value.green { color: var(--green); }
+.s5-cost-label { color: var(--text-tertiary); font-size: 0.9rem; }
+
+/* Metric comparison grid */
+.s5-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.s5-metric-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.s5-metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  opacity: 0.5;
+}
+.s5-metric-card.red-border::before { background: var(--gradient-danger); }
+.s5-metric-card.solar-border::before { background: var(--gradient-solar); }
+.s5-metric-card.green-border::before { background: var(--gradient-battery); }
+
+.s5-metric-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+.s5-metric-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--separator);
+  font-size: 0.85rem;
+}
+.s5-metric-row:last-child { border-bottom: none; }
+.s5-metric-row .red { color: var(--red); font-weight: 600; }
+.s5-metric-row .solar { color: var(--solar); font-weight: 600; }
+.s5-metric-row .green { color: var(--green); font-weight: 600; }
+
+@media (max-width: 700px) {
+  .s5-metric-grid { grid-template-columns: 1fr; }
+  .s5-tabs { flex-wrap: wrap; }
+}

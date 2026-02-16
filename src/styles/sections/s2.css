@@ -191,6 +191,20 @@
   font-weight: 600;
 }
 
+.s2-insight-inline {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  font-weight: 300;
+  line-height: 1.7;
+  text-align: center;
+  max-width: 540px;
+  margin: 0 auto;
+}
+.s2-insight-inline strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 @media (max-width: 640px) {
   .s2-chart-container { padding: 24px 16px 16px; }
   .s2-stats-row { grid-template-columns: 1fr 1fr; }

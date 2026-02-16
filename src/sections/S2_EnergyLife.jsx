@@ -231,16 +231,8 @@ export default function S2_EnergyLife() {
             <div className="stat-label">Peak Demand</div>
           </div>
         </div>
-      </ScrollSection>
-
-      {/* Insight */}
-      <ScrollSection>
-        <div className="s2-insight">
-          <div className="insight-icon">&#9889;</div>
-          <div className="insight-big">{dailyTotal.toFixed(0)} kWh</div>
-          <div className="insight-text">
-            Your home consumes <strong>{dailyTotal.toFixed(0)} kWh every day</strong>. Most of it happens in the evening &mdash; when the sun isn&rsquo;t shining. That&rsquo;s the mismatch we need to solve.
-          </div>
+        <div className="s2-insight-inline" style={{ marginTop: 32 }}>
+          Your home consumes <strong>{dailyTotal.toFixed(0)} kWh every day</strong>. Most of it happens in the evening &mdash; when the sun isn&rsquo;t shining. That&rsquo;s the mismatch we need to solve.
         </div>
       </ScrollSection>
 

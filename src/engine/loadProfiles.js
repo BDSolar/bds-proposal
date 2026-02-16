@@ -55,9 +55,18 @@ export function generateLoadProfiles(customer) {
       + scaled.evCharging[h] + scaled.lighting[h]
   }
 
+  const dailyTotal = totalLoad.reduce((a, b) => a + b, 0)
+
+  // Daytime (6am–6pm, hours 6–17) / overnight (6pm–6am, hours 18–23 + 0–5)
+  let daytimeLoad = 0
+  for (let h = 6; h <= 17; h++) daytimeLoad += totalLoad[h]
+  const overnightLoad = dailyTotal - daytimeLoad
+
   return {
     ...scaled,
     totalLoad,
-    dailyTotal: totalLoad.reduce((a, b) => a + b, 0),
+    dailyTotal,
+    daytimeLoad: Math.round(daytimeLoad * 10) / 10,
+    overnightLoad: Math.round(overnightLoad * 10) / 10,
   }
 }

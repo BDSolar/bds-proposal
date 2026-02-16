@@ -162,6 +162,73 @@ export default function S7_YourSystem() {
         </div>
       </ScrollSection>
 
+      {/* System Options */}
+      {er?.options && (
+        <ScrollSection>
+          <div className="section-label">System Options</div>
+          <div className="s7-options-grid">
+            {er.options.map((opt) => {
+              const isRecommended = opt.coverageRatio === 1.5
+              return (
+                <div key={opt.coveragePct} className={`s7-option-card${isRecommended ? ' recommended' : ''}`}>
+                  {isRecommended && <div className="s7-option-recommended">Recommended</div>}
+                  <div className="s7-option-badge">{opt.coveragePct}%</div>
+                  <div className="s7-option-label">Coverage</div>
+
+                  <div className="s7-option-price">${opt.systemPrice.toLocaleString()}</div>
+                  <div className="s7-option-price-note">inc. GST, after rebates</div>
+
+                  <div className="s7-option-stats">
+                    <div className="s7-option-stat">
+                      <span className="s7-option-stat-val">{opt.panelCount}</span>
+                      <span className="s7-option-stat-label">Panels</span>
+                    </div>
+                    <div className="s7-option-stat">
+                      <span className="s7-option-stat-val">{opt.arrayKw} kW</span>
+                      <span className="s7-option-stat-label">Solar</span>
+                    </div>
+                    <div className="s7-option-stat">
+                      <span className="s7-option-stat-val">{opt.batteryKwh} kWh</span>
+                      <span className="s7-option-stat-label">Battery</span>
+                    </div>
+                  </div>
+
+                  <div className="s7-option-divider" />
+
+                  <div className="s7-option-annual">
+                    <span className="s7-option-annual-label">{opt.zeroBill ? 'Annual bill' : 'Annual cost'}</span>
+                    <span className={`s7-option-annual-val${opt.zeroBill ? ' zero' : ''}`}>
+                      {opt.zeroBill ? '$0' : `$${opt.annualCost.toLocaleString()}`}
+                    </span>
+                  </div>
+
+                  {opt.annualCredit > 0 && (
+                    <div className="s7-option-credit">
+                      <span className="s7-option-credit-label">Annual credit</span>
+                      <span className="s7-option-credit-val">+${opt.annualCredit.toLocaleString()}</span>
+                    </div>
+                  )}
+
+                  {opt.fitRevenue > 0 && (
+                    <div className="s7-option-fit">
+                      <span className="s7-option-fit-label">Export revenue</span>
+                      <span className="s7-option-fit-val">${opt.fitRevenue.toLocaleString()}/yr</span>
+                    </div>
+                  )}
+
+                  <div className="s7-option-payback">
+                    <span className="s7-option-payback-label">Payback</span>
+                    <span className="s7-option-payback-val">{opt.paybackYear} yrs</span>
+                  </div>
+
+                  {opt.zeroBill && <div className="s7-option-zero-badge">{opt.annualCredit > 0 ? `$0 Bill + $${opt.annualCredit.toLocaleString()} credit` : '$0 Bill'}</div>}
+                </div>
+              )
+            })}
+          </div>
+        </ScrollSection>
+      )}
+
       {/* Guarantee */}
       <ScrollSection>
         <div className="s7-guarantee">

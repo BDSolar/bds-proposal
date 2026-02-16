@@ -23,7 +23,7 @@ export const BATTERY = {
   maxDischargeRatePerModule: 2.5,
   roundTripEfficiency: 0.95,
   inverterSize: 10, // kW (caps charge/discharge)
-  initialSocPct: 0.10, // start sim at 10% SOC
+  initialSocPct: 1.0, // start sim at FULL capacity (steady-state — previous day's solar charged it)
   chemistry: 'LiFePO\u2084',
   cycles: '10,000+',
   warranty: '10yr',
@@ -40,11 +40,44 @@ export const MIN_BATTERY_MODULES = 2
 export const MAX_KW_SINGLE_PHASE = 30
 export const MAX_KW_THREE_PHASE = 30
 
-export const PRICING = {
-  solarPerKw: 1200,
-  batteryPerKwh: 800,
-  baseInstall: 3000,
-}
+// ── Real BDS pricing model ──
+export const PANEL_PRICE = 121.13 // ex-GST per panel (LONGi X10 475W via Raystech)
+
+export const BATTERY_MODULE_PRICE = 3632 // ex-GST per 8kWh Sigenergy module
+export const BATTERY_USABLE_PER_MODULE = 7.8 // kWh usable per module
+
+// Sigenergy Energy Controllers (ex-GST)
+export const INVERTERS = [
+  // Single Phase
+  { id: 'sig-ec-5sp',  name: 'SigenStor EC 5.0 SP',  phases: 'single', maxPvKw: 10, unitPrice: 1343 },
+  { id: 'sig-ec-6sp',  name: 'SigenStor EC 6.0 SP',  phases: 'single', maxPvKw: 12, unitPrice: 1452 },
+  { id: 'sig-ec-8sp',  name: 'SigenStor EC 8.0 SP',  phases: 'single', maxPvKw: 16, unitPrice: 2482 },
+  { id: 'sig-ec-10sp', name: 'SigenStor EC 10.0 SP', phases: 'single', maxPvKw: 20, unitPrice: 2675 },
+  { id: 'sig-ec-12sp', name: 'SigenStor EC 12.0 SP', phases: 'single', maxPvKw: 24, unitPrice: 2869 },
+  // Three Phase
+  { id: 'sig-ec-5tp',  name: 'SigenStor EC 5.0 TP',  phases: 'three', maxPvKw: 8,  unitPrice: 2300 },
+  { id: 'sig-ec-10tp', name: 'SigenStor EC 10.0 TP', phases: 'three', maxPvKw: 16, unitPrice: 2663 },
+  { id: 'sig-ec-15tp', name: 'SigenStor EC 15.0 TP', phases: 'three', maxPvKw: 24, unitPrice: 3511 },
+  { id: 'sig-ec-20tp', name: 'SigenStor EC 20.0 TP', phases: 'three', maxPvKw: 32, unitPrice: 4007 },
+  { id: 'sig-ec-25tp', name: 'SigenStor EC 25.0 TP', phases: 'three', maxPvKw: 40, unitPrice: 4600 },
+  { id: 'sig-ec-30tp', name: 'SigenStor EC 30.0 TP', phases: 'three', maxPvKw: 48, unitPrice: 5060 },
+]
+
+export const PV_INSTALL_PER_KW = 300 // ex-GST
+export const BATTERY_INSTALL_PER_STACK = 1600 // ex-GST per stack
+
+export const GP_MARGIN = 0.375 // 37.5%
+export const COMMISSION_RATE = 0.0875 // 8.75%
+export const GST = 1.1
+
+export const STC_PRICE = 37
+export const STC_ZONE_RATING = 1.382 // QLD zone 3
+export const STC_DEEMING = 5
+
+export const BATTERY_REBATE_PER_KWH = 311
+export const BATTERY_REBATE_MAX_KWH = 50
+
+export const COVERAGE_TIERS = [1.0, 1.25, 1.5, 1.75]
 
 export const FINANCIAL_DEFAULTS = {
   escalation: 0.05, // 5% p.a.

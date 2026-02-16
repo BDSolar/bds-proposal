@@ -1,42 +1,76 @@
 // Main calculation engine — runs once after form submission
-// Produces all numbers for Sections 1–8
+// Produces all numbers for Sections 1–8 plus 4 system option tiers
+//
+// SIZING PHILOSOPHY: Battery-First
+// Battery is the anchor (150% of daily usage). Solar is sized to support it.
 
 import {
-  PANEL, BATTERY, SYSTEM_LOSSES, COVERAGE_RATIO,
-  MIN_BATTERY_MODULES, PRICING, FINANCIAL_DEFAULTS,
-  NETWORK_LOOKUP,
+  PANEL, BATTERY, SYSTEM_LOSSES,
+  MIN_BATTERY_MODULES, FINANCIAL_DEFAULTS,
+  NETWORK_LOOKUP, COVERAGE_TIERS,
+  PANEL_PRICE, BATTERY_MODULE_PRICE, BATTERY_USABLE_PER_MODULE,
+  INVERTERS, PV_INSTALL_PER_KW, BATTERY_INSTALL_PER_STACK,
+  GP_MARGIN, COMMISSION_RATE, GST,
+  STC_PRICE, STC_ZONE_RATING, STC_DEEMING,
+  BATTERY_REBATE_PER_KWH, BATTERY_REBATE_MAX_KWH,
 } from './constants'
 import { generateLoadProfiles } from './loadProfiles'
 import { lookupSolarZone, generateSolarCurve, getDailyProductionKwh } from './solarProduction'
 
-// ── System sizing (150% rule) ──
-function sizeSystem(customer, loadProfiles) {
-  const dailyUsage = loadProfiles.dailyTotal
-  const zone = lookupSolarZone(customer.postcode, customer.state)
-  const psh = zone.psh
-  const effectivePSH = psh * (1 - SYSTEM_LOSSES)
+// ── Auto-select cheapest inverter that fits the PV array ──
+function autoSelectInverter(pvKw, phase) {
+  const phaseKey = phase === 'Three' ? 'three' : 'single'
+  const candidates = INVERTERS
+    .filter(inv => inv.phases === phaseKey && inv.maxPvKw >= pvKw)
+    .sort((a, b) => a.unitPrice - b.unitPrice)
 
-  // 150% target production
-  const targetProduction = dailyUsage * COVERAGE_RATIO
+  if (candidates.length > 0) return candidates[0]
 
-  // Required kW
-  const requiredKw = targetProduction / effectivePSH
+  // Fallback: largest inverter for the phase type
+  const fallback = INVERTERS
+    .filter(inv => inv.phases === phaseKey)
+    .sort((a, b) => b.maxPvKw - a.maxPvKw)
+  return fallback[0]
+}
 
-  // Panel count (round up to nearest panel)
-  let panelCount = Math.ceil((requiredKw * 1000) / PANEL.wattage)
-  panelCount = Math.max(panelCount, 10) // minimum 10 panels
+// ── BDS pricing waterfall ──
+function calculateSystemPrice(panelCount, pvKw, batteryModules, phase) {
+  const panelsCost = panelCount * PANEL_PRICE
+  const inverter = autoSelectInverter(pvKw, phase)
+  const inverterCost = inverter.unitPrice
+  const batteryCost = batteryModules * BATTERY_MODULE_PRICE
+  const pvInstall = pvKw * PV_INSTALL_PER_KW
+  const battInstall = batteryModules > 0 ? BATTERY_INSTALL_PER_STACK : 0
 
-  const actualKw = (panelCount * PANEL.wattage) / 1000
+  const totalCog = panelsCost + inverterCost + batteryCost + pvInstall + battInstall
 
-  // Battery sizing — cover evening/night usage with 10% buffer
-  const solarCurve = generateSolarCurve(actualKw, psh)
-  let eveningUsage = 0
-  for (let h = 0; h < 24; h++) {
-    if (solarCurve[h] < 0.1) { // effectively no solar
-      eveningUsage += loadProfiles.totalLoad[h]
-    }
+  const gpMargin = totalCog * GP_MARGIN
+  const baseIncGst = (totalCog + gpMargin) * GST
+
+  const stcRebate = Math.floor(pvKw * STC_ZONE_RATING * STC_DEEMING) * STC_PRICE
+  const usableKwh = batteryModules * BATTERY_USABLE_PER_MODULE
+  const batteryRebate = Math.min(usableKwh, BATTERY_REBATE_MAX_KWH) * BATTERY_REBATE_PER_KWH
+
+  const commission = (baseIncGst - stcRebate - batteryRebate) * COMMISSION_RATE /
+    (1 - COMMISSION_RATE * GST) / GST
+
+  const priceIncGst = (totalCog + gpMargin + commission) * GST
+  const customerPrice = Math.round(priceIncGst - stcRebate - batteryRebate)
+
+  return {
+    customerPrice,
+    stcRebate,
+    batteryRebate,
+    totalRebates: stcRebate + batteryRebate,
+    priceIncGst: Math.round(priceIncGst),
+    inverterName: inverter.name,
   }
-  const requiredUsable = eveningUsage * 1.1
+}
+
+// ── Size battery (THE SYSTEM ANCHOR) ──
+// Battery sized to 150% of total daily usage — same for all tiers
+function sizeBattery(dailyUsage) {
+  const requiredUsable = dailyUsage * 1.5
   let modules = Math.ceil(requiredUsable / (BATTERY.capacityPerModule * BATTERY.depthOfDischarge))
   modules = Math.max(MIN_BATTERY_MODULES, modules)
 
@@ -45,19 +79,27 @@ function sizeSystem(customer, loadProfiles) {
   const maxChargeKw = Math.min(modules * BATTERY.maxChargeRatePerModule, BATTERY.inverterSize)
   const maxDischargeKw = Math.min(modules * BATTERY.maxDischargeRatePerModule, BATTERY.inverterSize)
 
-  // System cost
-  const rawCost = (actualKw * PRICING.solarPerKw) + (totalCapacity * PRICING.batteryPerKwh) + PRICING.baseInstall
-  const systemCost = Math.round(rawCost / 500) * 500
+  return { modules, totalCapacity, usableCapacity, maxChargeKw, maxDischargeKw }
+}
+
+// ── Size solar for a given coverage ratio ──
+function sizeSolar(customer, loadProfiles, coverageRatio) {
+  const dailyUsage = loadProfiles.dailyTotal
+  const zone = lookupSolarZone(customer.postcode, customer.state)
+  const psh = zone.psh
+  const effectivePSH = psh * (1 - SYSTEM_LOSSES)
+
+  const targetProduction = dailyUsage * coverageRatio
+  const requiredKw = targetProduction / effectivePSH
+
+  let panelCount = Math.ceil((requiredKw * 1000) / PANEL.wattage)
+  panelCount = Math.max(panelCount, 10)
+
+  const actualKw = (panelCount * PANEL.wattage) / 1000
 
   return {
     panelCount,
     actualKw,
-    totalCapacity,
-    usableCapacity,
-    modules,
-    maxChargeKw,
-    maxDischargeKw,
-    systemCost,
     zone,
     psh,
     dailyProduction: getDailyProductionKwh(actualKw, psh),
@@ -84,8 +126,8 @@ function simulateSolarOnly(totalLoad, solarCurve, tariffRate, supplyCharge, fit)
   const totalGridImport = gridImport.reduce((a, b) => a + b, 0)
   const totalSolar = solarCurve.reduce((a, b) => a + b, 0)
   const selfConsumptionPct = totalSolar > 0 ? Math.round((totalSelfConsumed / totalSolar) * 100) : 0
-  const dailyCost = Math.max(0, (totalGridImport * tariffRate) + supplyCharge - (totalExported * fit))
-  const annualCost = Math.round(dailyCost * 365)
+  const dailyCost = (totalGridImport * tariffRate) + supplyCharge - (totalExported * fit)
+  const annualCost = Math.round(Math.max(0, dailyCost) * 365)
 
   return {
     selfConsumption,
@@ -95,15 +137,16 @@ function simulateSolarOnly(totalLoad, solarCurve, tariffRate, supplyCharge, fit)
     totalExported,
     totalGridImport,
     selfConsumptionPct,
-    dailyCost,
+    dailyCost: Math.round(dailyCost * 100) / 100,
     annualCost,
   }
 }
 
-// ── Battery simulation ──
-function simulateBattery(totalLoad, solarCurve, systemSize) {
-  const { usableCapacity, maxChargeKw, maxDischargeKw } = systemSize
+// ── Battery simulation (starts at FULL capacity — steady state) ──
+function simulateBattery(totalLoad, solarCurve, batterySize) {
+  const { usableCapacity, maxChargeKw, maxDischargeKw } = batterySize
   const efficiency = BATTERY.roundTripEfficiency
+  // Battery starts FULL — previous day's solar charged it
   const initialSoc = usableCapacity * BATTERY.initialSocPct
 
   const soc = []
@@ -150,66 +193,33 @@ function simulateBattery(totalLoad, solarCurve, systemSize) {
   const totalDischarged = discharge.reduce((a, b) => a + b, 0)
   const totalSC = selfConsume.reduce((a, b) => a + b, 0)
   const totalUsage = totalLoad.reduce((a, b) => a + b, 0)
-  const selfPoweredPct = Math.round(((totalSC + totalDischarged) / totalUsage) * 100)
+  const selfPoweredPct = Math.min(100, Math.round(((totalSC + totalDischarged) / totalUsage) * 100))
 
   return {
     soc, charge, discharge, gridImport, gridExport, selfConsume,
-    totalGridImport, totalGridExport, totalCharged, totalDischarged,
+    startSoc: Math.round(initialSoc * 10) / 10,
+    endSoc: soc[23],
+    totalGridImport,
+    totalGridExport,
+    totalCharged,
+    totalDischarged,
     selfPoweredPct,
   }
 }
 
-// ── Bill-to-zero verification loop ──
-function verifyBillToZero(totalLoad, customer, systemSize) {
-  const tariffRate = parseFloat(customer.tariffRate) || 0.32
-  const supplyCharge = parseFloat(customer.supplyCharge) || 1.10
-  const fit = FINANCIAL_DEFAULTS.fit
-  let { panelCount, actualKw } = systemSize
-  const zone = systemSize.zone
-
-  let attempts = 0
-  while (attempts < 20) {
-    const solarCurve = generateSolarCurve(actualKw, zone.psh)
-    const battResult = simulateBattery(totalLoad, solarCurve, systemSize)
-
-    const dailyExportRevenue = battResult.totalGridExport * fit
-    const dailyImportCost = battResult.totalGridImport * tariffRate
-    const dailyNetCost = dailyImportCost + supplyCharge - dailyExportRevenue
-
-    if (dailyNetCost <= 0) break
-
-    // Add a panel and recalculate
-    panelCount += 1
-    actualKw = (panelCount * PANEL.wattage) / 1000
-    systemSize = {
-      ...systemSize,
-      panelCount,
-      actualKw,
-      dailyProduction: getDailyProductionKwh(actualKw, zone.psh),
-    }
-    // Recalculate system cost
-    const rawCost = (actualKw * PRICING.solarPerKw) + (systemSize.totalCapacity * PRICING.batteryPerKwh) + PRICING.baseInstall
-    systemSize.systemCost = Math.round(rawCost / 500) * 500
-    attempts++
-  }
-
-  return systemSize
-}
-
 // ── Financial projections ──
-function calculateFinancials(customer, systemSize, batteryResults) {
+function calculateFinancials(customer, systemCost, batteryResults, tariffRate, supplyCharge) {
   const dailyUsage = parseFloat(customer.dailyUsage) || 30
-  const tariffRate = parseFloat(customer.tariffRate) || 0.32
-  const supplyCharge = parseFloat(customer.supplyCharge) || 1.10
+  tariffRate = tariffRate || parseFloat(customer.tariffRate) || 0.32
+  supplyCharge = supplyCharge || parseFloat(customer.supplyCharge) || 1.10
   const fit = FINANCIAL_DEFAULTS.fit
   const escalation = FINANCIAL_DEFAULTS.escalation
   const years = FINANCIAL_DEFAULTS.projectionYears
   const startYear = FINANCIAL_DEFAULTS.startYear
-  const systemCost = systemSize.systemCost
   const solarDegradation = PANEL.degradation
 
   const yearlyGridCost = []
-  const yearlySolarSavings = []
+  const yearlySavings = []
   const cumulativeGridCost = []
   const cumulativeSolarNet = []
 
@@ -222,21 +232,21 @@ function calculateFinancials(customer, systemSize, batteryResults) {
     const escalatedSupply = supplyCharge * factor
     const gridAnnual = (dailyUsage * escalatedRate * 365) + (escalatedSupply * 365)
 
-    // Solar+battery: exports degrade, but cover supply charge
     const prodFactor = Math.pow(1 - solarDegradation, i)
     const dailyExport = batteryResults.totalGridExport * prodFactor
     const exportCredit = dailyExport * fit * 365
     const importCost = batteryResults.totalGridImport * escalatedRate * 365
     const supplyCost = escalatedSupply * 365
-    const solarAnnualCost = Math.max(0, importCost + supplyCost - exportCredit)
+    // Allow negative cost (credit surplus)
+    const solarAnnualCost = importCost + supplyCost - exportCredit
 
-    const yearSavings = gridAnnual - solarAnnualCost
+    const yearSavings = gridAnnual - Math.max(0, solarAnnualCost)
 
     gridCumulative += gridAnnual
     savingsCumulative += yearSavings
 
     yearlyGridCost.push(Math.round(gridAnnual))
-    yearlySolarSavings.push(Math.round(yearSavings))
+    yearlySavings.push(Math.round(yearSavings))
     cumulativeGridCost.push(Math.round(gridCumulative))
     cumulativeSolarNet.push(Math.round(systemCost - savingsCumulative))
   }
@@ -248,7 +258,7 @@ function calculateFinancials(customer, systemSize, batteryResults) {
   return {
     systemCost,
     yearlyGridCost,
-    yearlySolarSavings,
+    yearlySavings,
     cumulativeGridCost,
     cumulativeSolarNet,
     paybackYear,
@@ -256,6 +266,89 @@ function calculateFinancials(customer, systemSize, batteryResults) {
     roi,
     startYear,
     years,
+  }
+}
+
+// ── Generate a complete system option for a given coverage ratio ──
+function generateSystemOption(customer, loadProfiles, batterySize, coverageRatio) {
+  const tariffRate = parseFloat(customer.tariffRate) || 0.32
+  const supplyCharge = parseFloat(customer.supplyCharge) || 1.10
+  const fit = FINANCIAL_DEFAULTS.fit
+  const phase = customer.phase || 'Single'
+
+  // 1. Size solar (battery is pre-sized — it's the anchor)
+  const solar = sizeSolar(customer, loadProfiles, coverageRatio)
+
+  // 2. Generate solar curve
+  const solarCurve = generateSolarCurve(solar.actualKw, solar.psh)
+
+  // 3. Solar-only sim
+  const solarOnly = simulateSolarOnly(loadProfiles.totalLoad, solarCurve, tariffRate, supplyCharge, fit)
+
+  // 4. Battery sim (starts FULL)
+  const batteryResults = simulateBattery(loadProfiles.totalLoad, solarCurve, batterySize)
+
+  // 5. Daily cost — allow negative (credit)
+  const dailyImportCost = batteryResults.totalGridImport * tariffRate
+  const dailyExportRevenue = batteryResults.totalGridExport * fit
+  const dailyNetCost = dailyImportCost + supplyCharge - dailyExportRevenue
+  const dailyCredit = Math.max(0, -dailyNetCost)
+  const annualCost = Math.max(0, Math.round(dailyNetCost * 365))
+  const annualCredit = Math.round(dailyCredit * 365)
+  const fitRevenue = Math.round(dailyExportRevenue * 365)
+
+  // 6. System price via BDS waterfall
+  const pricing = calculateSystemPrice(
+    solar.panelCount, solar.actualKw, batterySize.modules, phase
+  )
+
+  // 7. Financial projection
+  const financial = calculateFinancials(customer, pricing.customerPrice, batteryResults, tariffRate, supplyCharge)
+
+  // Combined systemSize object for downstream consumers
+  const systemSize = {
+    panelCount: solar.panelCount,
+    actualKw: solar.actualKw,
+    totalCapacity: batterySize.totalCapacity,
+    usableCapacity: batterySize.usableCapacity,
+    modules: batterySize.modules,
+    maxChargeKw: batterySize.maxChargeKw,
+    maxDischargeKw: batterySize.maxDischargeKw,
+    zone: solar.zone,
+    psh: solar.psh,
+    dailyProduction: solar.dailyProduction,
+  }
+
+  return {
+    coverageRatio,
+    coveragePct: Math.round(coverageRatio * 100),
+    panelCount: solar.panelCount,
+    arrayKw: Math.round(solar.actualKw * 100) / 100,
+    batteryModules: batterySize.modules,
+    batteryKwh: batterySize.totalCapacity,
+    usableKwh: Math.round(batterySize.usableCapacity * 10) / 10,
+    systemPrice: pricing.customerPrice,
+    stcRebate: pricing.stcRebate,
+    batteryRebate: pricing.batteryRebate,
+    totalRebates: pricing.totalRebates,
+    inverterName: pricing.inverterName,
+    dailyCost: Math.round(dailyNetCost * 100) / 100,
+    dailyCredit: Math.round(dailyCredit * 100) / 100,
+    annualCost,
+    annualCredit,
+    fitRevenue,
+    dailyExport: Math.round(batteryResults.totalGridExport * 100) / 100,
+    selfPoweredPct: batteryResults.selfPoweredPct,
+    paybackYear: financial.paybackYear,
+    savings20yr: financial.totalSavings20yr,
+    roi: financial.roi,
+    zeroBill: dailyNetCost <= 0,
+    // Full sub-results for the recommended option
+    solarOnly,
+    battery: batteryResults,
+    financial,
+    systemSize,
+    solarCurve,
   }
 }
 
@@ -267,9 +360,9 @@ function buildScenarios(customer, solarOnly, batteryResults) {
   const fit = FINANCIAL_DEFAULTS.fit
 
   const noSolarDaily = (dailyUsage * tariffRate) + supplyCharge
-  const battDaily = Math.max(0,
+  const battDailyNet =
     (batteryResults.totalGridImport * tariffRate) + supplyCharge - (batteryResults.totalGridExport * fit)
-  )
+  const battDailyCredit = Math.max(0, -battDailyNet)
 
   return {
     noSolar: {
@@ -283,8 +376,9 @@ function buildScenarios(customer, solarOnly, batteryResults) {
       selfPoweredPct: solarOnly.selfConsumptionPct,
     },
     solarBattery: {
-      dailyCost: Math.round(battDaily * 100) / 100,
-      annualCost: Math.round(battDaily * 365),
+      dailyCost: Math.round(battDailyNet * 100) / 100,
+      annualCost: Math.max(0, Math.round(battDailyNet * 365)),
+      annualCredit: Math.round(battDailyCredit * 365),
       selfPoweredPct: batteryResults.selfPoweredPct,
     },
   }
@@ -375,6 +469,12 @@ function buildAssumptions(customer, systemSize, solarCurve) {
       roundTripEfficiency: BATTERY.roundTripEfficiency * 100,
       depthOfDischarge: BATTERY.depthOfDischarge * 100,
     },
+    sizing: {
+      method: 'Battery-first',
+      batteryRule: '150% of peak daily usage',
+      solarRule: 'Daytime load + battery recharge + export buffer for supply charge offset',
+      simStartCondition: 'Battery starts at full capacity (steady-state)',
+    },
     degradation: {
       solar: PANEL.degradation * 100,
       battery: BATTERY.degradationAnnual * 100,
@@ -386,6 +486,7 @@ function buildAssumptions(customer, systemSize, solarCurve) {
     },
     guarantee: {
       type: 'Bill-to-Zero',
+      method: 'Battery-first sizing with export credit surplus',
       coverageRatio: Math.round((systemSize.dailyProduction / dailyUsage) * 100),
       guarantee: "If system doesn't zero bill, BDS pays the difference",
       term: 'Lifetime of system',
@@ -396,48 +497,40 @@ function buildAssumptions(customer, systemSize, solarCurve) {
 // ── Main entry point ──
 export function calculateProposal(formData) {
   const customer = formData.customer
+  const dailyUsage = parseFloat(customer.dailyUsage) || 30
 
-  // 1. Generate load profiles
+  // 1. Generate load profiles (includes daytime/overnight split)
   const loadProfiles = generateLoadProfiles(customer)
 
-  // 2. Size the system (150% rule)
-  let systemSize = sizeSystem(customer, loadProfiles)
+  // 2. Size the battery FIRST — the system anchor (150% of daily usage)
+  //    Same battery for all tiers
+  const batterySize = sizeBattery(dailyUsage)
 
-  // 3. Generate solar production curve
-  const solarCurve = generateSolarCurve(systemSize.actualKw, systemSize.psh)
+  // 3. Generate all 4 coverage tier options (solar varies, battery stays fixed)
+  const options = COVERAGE_TIERS.map(ratio =>
+    generateSystemOption(customer, loadProfiles, batterySize, ratio)
+  )
 
-  // 4. Solar-only simulation
-  const tariffRate = parseFloat(customer.tariffRate) || 0.32
-  const supplyCharge = parseFloat(customer.supplyCharge) || 1.10
-  const fit = FINANCIAL_DEFAULTS.fit
-  const solarOnly = simulateSolarOnly(loadProfiles.totalLoad, solarCurve, tariffRate, supplyCharge, fit)
+  // 4. The 150% option is the recommended default (index 2)
+  const recommended = options[2]
+  const systemSize = recommended.systemSize
 
-  // 5. Battery simulation
-  const batteryResults = simulateBattery(loadProfiles.totalLoad, solarCurve, systemSize)
+  // Add systemCost to systemSize for assumptions builder
+  systemSize.systemCost = recommended.systemPrice
 
-  // 6. Bill-to-zero verification — add panels if needed
-  systemSize = verifyBillToZero(loadProfiles.totalLoad, customer, systemSize)
-
-  // Re-run sims with final system size if panels were added
-  const finalSolarCurve = generateSolarCurve(systemSize.actualKw, systemSize.psh)
-  const finalSolarOnly = simulateSolarOnly(loadProfiles.totalLoad, finalSolarCurve, tariffRate, supplyCharge, fit)
-  const finalBattery = simulateBattery(loadProfiles.totalLoad, finalSolarCurve, systemSize)
-
-  // 7. Financial projections
-  const financial = calculateFinancials(customer, systemSize, finalBattery)
-
-  // 8. Build output
-  const scenarios = buildScenarios(customer, finalSolarOnly, finalBattery)
+  // 5. Build output — top-level fields come from recommended option
+  //    so S2-S6 need no changes
+  const scenarios = buildScenarios(customer, recommended.solarOnly, recommended.battery)
   const system = buildSystemSpec(systemSize, customer)
-  const assumptions = buildAssumptions(customer, systemSize, finalSolarCurve)
+  const assumptions = buildAssumptions(customer, systemSize, recommended.solarCurve)
 
   return {
     // Section 1
-    yearlyBills: financial.yearlyGridCost,
-    year1Bill: financial.yearlyGridCost[0],
-    year20Bill: financial.yearlyGridCost[19],
-    billIncreasePct: Math.round(((financial.yearlyGridCost[19] / financial.yearlyGridCost[0]) - 1) * 100),
-    cumulativeBillNoSolar: financial.cumulativeGridCost[19],
+    yearlyBills: recommended.financial.yearlyGridCost,
+    year1Bill: recommended.financial.yearlyGridCost[0],
+    year20Bill: recommended.financial.yearlyGridCost[19],
+    billIncreasePct: Math.round(((recommended.financial.yearlyGridCost[19] / recommended.financial.yearlyGridCost[0]) - 1) * 100),
+    cumulativeBillNoSolar: recommended.financial.cumulativeGridCost[19],
 
     // Section 2
     loadProfiles: {
@@ -449,24 +542,27 @@ export function calculateProposal(formData) {
     },
     totalLoad: loadProfiles.totalLoad,
     dailyTotal: loadProfiles.dailyTotal,
+    daytimeLoad: loadProfiles.daytimeLoad,
+    overnightLoad: loadProfiles.overnightLoad,
 
     // Section 3
-    solarProduction: finalSolarCurve,
+    solarProduction: recommended.solarCurve,
 
     // Section 3 (solar only)
-    solarOnly: finalSolarOnly,
+    solarOnly: recommended.solarOnly,
 
     // Section 4 (battery)
-    battery: finalBattery,
+    battery: recommended.battery,
 
     // Section 5 (scenarios)
     scenarios,
 
     // Section 6 (financials)
-    financial,
+    financial: recommended.financial,
 
-    // Section 7 (system)
+    // Section 7 (system + options)
     system,
+    options,
 
     // Section 8 (assumptions)
     assumptions,

@@ -1,12 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 148 28" width="148" height="28">
   <style>
-    .sig { font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; font-weight: 600; font-size: 22px; fill: white; }
+    .sig { font-family: 'Exo 2', 'Rajdhani', 'Inter', sans-serif; font-weight: 700; font-size: 20px; fill: white; letter-spacing: 2.5px; }
   </style>
-  <!-- Each character at explicit x position for precise dot placement -->
-  <text class="sig" x="0,16,24,40,56,72,88,103,120" y="23">SIGENERGY</text>
-  <!-- Two red dots (dieresis) centred above the first G (x=40, ~14px wide → centre ~47) -->
-  <circle cx="31" cy="4" r="1.5" fill="#E60012"/>
-  <circle cx="38" cy="4" r="1.5" fill="#E60012"/>
-  <!-- One red dot centred above Y (x=120, ~13px wide → centre ~126) -->
-  <circle cx="127" cy="4" r="1.5" fill="#E60012"/>
+  <text class="sig" x="0" y="23">SIGENERGY</text>
+  <!-- One red square above G (4th letter, approx center x≈42) -->
+  <rect x="40" y="2" width="3.5" height="3.5" rx="0.5" fill="#E60012"/>
+  <!-- One red square above Y (9th letter, approx center x≈119) -->
+  <rect x="117" y="2" width="3.5" height="3.5" rx="0.5" fill="#E60012"/>
 </svg>

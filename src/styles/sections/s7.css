@@ -46,13 +46,15 @@
 .s7-product-header {
   margin-bottom: 20px;
 }
-.s7-product-brand {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: var(--text-tertiary);
-  margin-bottom: 6px;
+.s7-product-logo {
+  margin-bottom: 8px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+}
+.s7-logo-img {
+  height: 18px;
+  width: auto;
 }
 .s7-product-model {
   font-size: 1.4rem;
@@ -64,32 +66,76 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px 0;
+  height: 320px;
   margin-bottom: 20px;
 }
-.s7-panel-svg,
+.s7-panel-svg {
+  height: 300px;
+  width: auto;
+}
 .s7-battery-svg {
-  width: 200px;
-  height: 220px;
-  opacity: 0.9;
+  height: 300px;
+  width: auto;
 }
 
-/* Eye pulse animation */
-.s7-eye-pulse {
-  animation: s7EyePulse 1.8s ease-in-out infinite;
+/* ── Trace Animations ── */
+
+/* Orange trace flowing through both LONGi panels */
+.s7-trace-orange {
+  animation: s7TraceOrange 4s linear infinite;
 }
-@keyframes s7EyePulse {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; }
+@keyframes s7TraceOrange {
+  0% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -1290; }
 }
 
-/* Charge bar animation */
-.s7-charge-bar {
-  animation: s7ChargeGlow 2s ease-in-out infinite;
+/* Blue trace around each Sigenergy module */
+.s7-trace-blue {
+  animation: s7TraceBlue 2s linear infinite;
 }
-@keyframes s7ChargeGlow {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.7; }
+@keyframes s7TraceBlue {
+  0% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -256; }
+}
+
+/* Blue snake path flowing up to eye */
+.s7-trace-snake {
+  animation: s7TraceSnake 2.5s linear infinite;
+}
+@keyframes s7TraceSnake {
+  0% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -400; }
+}
+
+/* Eagle eye bright blue flash */
+.s7-eye-flash {
+  animation: s7EyeFlash 2s ease-in-out infinite;
+}
+@keyframes s7EyeFlash {
+  0%, 100% { opacity: 0.4; filter: brightness(0.8); }
+  50% { opacity: 1; filter: brightness(1.5); }
+}
+
+/* ── Electric Mist (dense electron cloud between panels) ── */
+.s7-mist-up {
+  opacity: 0;
+  animation: s7MistUp 2s ease-in-out infinite;
+}
+.s7-mist-down {
+  opacity: 0;
+  animation: s7MistDown 2.4s ease-in-out infinite;
+}
+@keyframes s7MistUp {
+  0%, 100% { opacity: 0; transform: translateY(0); }
+  12% { opacity: 1; }
+  50% { opacity: 0.7; transform: translateY(-10px); }
+  88% { opacity: 0.3; }
+}
+@keyframes s7MistDown {
+  0%, 100% { opacity: 0; transform: translateY(0); }
+  12% { opacity: 0.9; }
+  50% { opacity: 0.6; transform: translateY(10px); }
+  88% { opacity: 0.25; }
 }
 
 /* Specs Grid */

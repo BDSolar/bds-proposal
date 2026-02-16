@@ -8,18 +8,7 @@ export default function DiamondLogo({ size = 80, className = '' }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Static base ring */}
-      <circle cx="40" cy="40" r="38" stroke="#e000f0" strokeWidth="1" fill="none" opacity="0.12" />
-      {/* Electric current rings */}
-      <circle cx="40" cy="40" r="38" stroke="#e000f0" strokeWidth="2" fill="none"
-        strokeDasharray="8 16 4 12" strokeLinecap="round"
-        className="current-ring-1" />
-      <circle cx="40" cy="40" r="38" stroke="#ff60ff" strokeWidth="1.5" fill="none"
-        strokeDasharray="3 22 6 18" strokeLinecap="round"
-        className="current-ring-2" />
-      <circle cx="40" cy="40" r="38" stroke="#c000d0" strokeWidth="1" fill="none"
-        strokeDasharray="2 10 8 14" strokeLinecap="round"
-        className="current-ring-3" />
+      <circle cx="40" cy="40" r="38" stroke="url(#logoGrad)" strokeWidth="1.5" fill="none" opacity="0.5" />
       {/* Diamond */}
       <path d="M26 30 L40 18 L54 30 L40 62 Z" stroke="url(#logoGrad)" strokeWidth="1.5" fill="none" />
       <path d="M26 30 L54 30" stroke="url(#logoGrad)" strokeWidth="1.5" />

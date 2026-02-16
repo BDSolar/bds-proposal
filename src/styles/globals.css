@@ -90,29 +90,6 @@ body { font-family: 'Outfit', sans-serif; background: var(--bg-primary); color: 
 }
 .hero-logo { width: 80px; height: 80px; margin-bottom: 32px; opacity: 0; animation: fadeUp 0.8s ease forwards 0.2s; }
 
-/* Electric current rings */
-.current-ring-1 {
-  filter: drop-shadow(0 0 4px #e000f0);
-  animation: currentFlow1 2s linear infinite;
-}
-.current-ring-2 {
-  filter: drop-shadow(0 0 3px #ff60ff);
-  animation: currentFlow2 1.4s linear infinite reverse;
-}
-.current-ring-3 {
-  filter: drop-shadow(0 0 6px #e000f0);
-  animation: currentFlow3 3s linear infinite;
-}
-
-@keyframes currentFlow1 {
-  to { stroke-dashoffset: -240; }
-}
-@keyframes currentFlow2 {
-  to { stroke-dashoffset: -240; }
-}
-@keyframes currentFlow3 {
-  to { stroke-dashoffset: -240; }
-}
 .hero-label {
   font-family: 'JetBrains Mono', monospace;
   font-size: 14px;

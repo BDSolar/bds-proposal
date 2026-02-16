@@ -97,6 +97,8 @@ function buildAccordionSections(cfg, er) {
   return null
 }
 
+const cfg = systemConfig
+
 const STATIC_ACCORDION_SECTIONS = [
   {
     id: 'tariff',
@@ -218,7 +220,6 @@ const ChevronDown = () => (
 export default function S8_Assumptions() {
   const { state } = useProposal()
   const er = state.engineResults
-  const cfg = systemConfig
   const [openId, setOpenId] = useState(null)
 
   const accordionSections = useMemo(() => {

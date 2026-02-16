@@ -273,6 +273,7 @@ export default function S5_BeforeAfter() {
         <div className="cta-section">
           <h2>From ${metrics.noSolar.annualCost.toLocaleString()} to<br /><span className="highlight">$0 per year</span></h2>
           <p>Now let&rsquo;s look at what that means over 20 years.</p>
+          <img src={`${import.meta.env.BASE_URL}house-power.png`} alt="Solar-powered home" className="s5-house-img" />
         </div>
       </ScrollSection>
     </div>

@@ -109,6 +109,14 @@
 .s5-metric-row .solar { color: var(--solar); font-weight: 600; }
 .s5-metric-row .green { color: var(--green); font-weight: 600; }
 
+/* House illustration */
+.s5-house-img {
+  display: block;
+  max-width: 750px;
+  width: 100%;
+  margin: 32px auto 0;
+}
+
 @media (max-width: 700px) {
   .s5-metric-grid { grid-template-columns: 1fr; }
   .s5-tabs { flex-wrap: wrap; }

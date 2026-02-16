@@ -113,7 +113,8 @@
 .roadmap-step:nth-child(3)::before { background: var(--gradient-battery); }
 .roadmap-step:nth-child(4)::before { background: var(--gradient-accent); }
 .roadmap-step-number { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--text-quaternary); margin-bottom: 12px; }
-.roadmap-step-icon { font-size: 24px; margin-bottom: 12px; }
+.roadmap-step-icon { width: 32px; height: 32px; margin-bottom: 12px; }
+.roadmap-step-icon svg { width: 100%; height: 100%; }
 .roadmap-step-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 6px; }
 .roadmap-step-desc { font-size: 0.85rem; font-weight: 300; color: var(--text-secondary); line-height: 1.5; }
 

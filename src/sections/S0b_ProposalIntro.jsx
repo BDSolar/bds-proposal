@@ -130,25 +130,58 @@ export default function S0b_ProposalIntro() {
         <div className="roadmap-steps stagger-in visible">
           <div className="roadmap-step">
             <div className="roadmap-step-number">01</div>
-            <div className="roadmap-step-icon">&#128200;</div>
+            <div className="roadmap-step-icon">
+              <svg viewBox="0 0 32 32" fill="none" stroke="url(#rmGrad)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <defs><linearGradient id="rmGrad" x1="0" y1="0" x2="32" y2="32"><stop offset="0%" stopColor="#e000f0" /><stop offset="100%" stopColor="#a020f0" /></linearGradient></defs>
+                <polyline points="4 24 12 16 18 20 28 8" />
+                <polyline points="22 8 28 8 28 14" />
+              </svg>
+            </div>
             <div className="roadmap-step-title">The Problem</div>
             <div className="roadmap-step-desc">Where your money is going and how rising electricity costs will impact you over the next 20 years.</div>
           </div>
           <div className="roadmap-step">
             <div className="roadmap-step-number">02</div>
-            <div className="roadmap-step-icon">&#9728;&#65039;</div>
+            <div className="roadmap-step-icon">
+              <svg viewBox="0 0 32 32" fill="none" stroke="url(#rmGrad)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="16" cy="16" r="5" />
+                <line x1="16" y1="3" x2="16" y2="7" />
+                <line x1="16" y1="25" x2="16" y2="29" />
+                <line x1="3" y1="16" x2="7" y2="16" />
+                <line x1="25" y1="16" x2="29" y2="16" />
+                <line x1="6.8" y1="6.8" x2="9.6" y2="9.6" />
+                <line x1="22.4" y1="22.4" x2="25.2" y2="25.2" />
+                <line x1="6.8" y1="25.2" x2="9.6" y2="22.4" />
+                <line x1="22.4" y1="9.6" x2="25.2" y2="6.8" />
+              </svg>
+            </div>
             <div className="roadmap-step-title">Solar + Battery</div>
             <div className="roadmap-step-desc">How solar panels and a battery work together to cover your usage around the clock.</div>
           </div>
           <div className="roadmap-step">
             <div className="roadmap-step-number">03</div>
-            <div className="roadmap-step-icon">&#128176;</div>
+            <div className="roadmap-step-icon">
+              <svg viewBox="0 0 32 32" fill="none" stroke="url(#rmGrad)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M16 3 L16 5" />
+                <path d="M12 7 C12 5 14 3 16 3 C18 3 20 5 20 7 C20 9 18 9 18 11 L14 11 C14 9 12 9 12 7Z" />
+                <line x1="14" y1="11" x2="18" y2="11" />
+                <line x1="14" y1="14" x2="18" y2="14" />
+                <path d="M8 20 L24 20 L24 28 L8 28 Z" />
+                <line x1="12" y1="20" x2="12" y2="28" />
+                <line x1="16" y1="20" x2="16" y2="28" />
+                <line x1="20" y1="20" x2="20" y2="28" />
+              </svg>
+            </div>
             <div className="roadmap-step-title">Your Savings</div>
             <div className="roadmap-step-desc">A before-and-after comparison of your energy costs and the long-term financial picture.</div>
           </div>
           <div className="roadmap-step">
             <div className="roadmap-step-number">04</div>
-            <div className="roadmap-step-icon">&#9889;</div>
+            <div className="roadmap-step-icon">
+              <svg viewBox="0 0 32 32" fill="none" stroke="url(#rmGrad)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="13 2 6 18 14 18 11 30 26 12 17 12 22 2" />
+              </svg>
+            </div>
             <div className="roadmap-step-title">Your System</div>
             <div className="roadmap-step-desc">The exact hardware, warranties, and Bill-to-Zero guarantee tailored to your home.</div>
           </div>

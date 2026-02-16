@@ -1,11 +1,35 @@
+import { useProposal } from '../context/ProposalContext'
 import Hero from '../components/Hero'
 import ScrollSection from '../components/ScrollSection'
 import systemConfig from '../data/systemConfig'
 import '../styles/sections/s7.css'
 
-const cfg = systemConfig
+function buildCfgFromEngine(er) {
+  const p = er.system.panels
+  const b = er.system.battery
+  return {
+    system: {
+      panelBrand: p.brand, panelModel: p.model, panelSeries: p.series,
+      panelTechnology: p.technology, panelWp: p.wattage, panelCount: p.panelCount,
+      panelEfficiency: p.efficiency, panelCellType: p.cellType,
+      panelWarrantyProduct: parseInt(p.warranty), panelWarrantyPerformance: parseInt(p.warranty.split('+')[1]),
+      arrayKw: p.totalKw, dailyProduction: er.system.dailyProduction,
+    },
+    battery: {
+      brand: b.brand, model: b.model, totalCapacityKwh: b.totalCapacity,
+      usableCapacityKwh: b.usableCapacity, modules: b.modules,
+      capacityPerModule: b.capacityPerModule, inverterSize: b.inverterSize,
+      evChargerKw: b.evChargerKw, chemistry: b.chemistry, cycles: b.cycles,
+      ip: b.ip, features: b.features, evCharger: b.evCharger,
+    },
+    financial: { coverageRatio: er.system.coverageRatio },
+  }
+}
 
 export default function S7_YourSystem() {
+  const { state } = useProposal()
+  const er = state.engineResults
+  const cfg = er ? buildCfgFromEngine(er) : systemConfig
   return (
     <div>
       <Hero badge="Section 07 — Your System" title="Meet your" highlightText="system" subtitle="Premium components, engineered to 150% of your usage. Here's exactly what powers your Bill-to-Zero home." />

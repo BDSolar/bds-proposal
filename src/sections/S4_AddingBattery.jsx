@@ -1,4 +1,5 @@
 import { useMemo, useState, useCallback } from 'react'
+import { useProposal } from '../context/ProposalContext'
 import Hero from '../components/Hero'
 import ScrollSection from '../components/ScrollSection'
 import StickyBeatChart from '../components/StickyBeatChart'
@@ -9,18 +10,40 @@ import { simulateBattery } from '../utils/batterySimulation'
 import systemConfig from '../data/systemConfig'
 import '../styles/sections/s4.css'
 
-const cfg = systemConfig
 const W = 1000, H = 380
 const padL = 55, padR = 20, padT = 20, padB = 50
 const chartW = W - padL - padR
 const chartH = H - padT - padB
 
 export default function S4_AddingBattery() {
+  const { state } = useProposal()
+  const er = state.engineResults
+  const cfg = er ? {
+    system: { arrayKw: er.system.panels.totalKw },
+    tariff: er.assumptions.tariff,
+    battery: { usableCapacityKwh: er.system.battery.usableCapacity },
+  } : systemConfig
   const [activeBeat, setActiveBeat] = useState(0)
 
-  const totalLoad = useMemo(() => getTotalLoad(), [])
-  const solar = useMemo(() => getSolarForSystemSize(cfg.system.arrayKw), [])
-  const sim = useMemo(() => simulateBattery(totalLoad, solar), [totalLoad, solar])
+  const totalLoad = useMemo(() => er ? er.totalLoad : getTotalLoad(), [er])
+  const solar = useMemo(() => er ? er.solarProduction : getSolarForSystemSize(systemConfig.system.arrayKw), [er])
+  const sim = useMemo(() => {
+    if (er) {
+      return {
+        battSOC: er.battery.soc,
+        battCharge: er.battery.charge,
+        battDischarge: er.battery.discharge,
+        gridImport: er.battery.gridImport,
+        gridExport: er.battery.gridExport,
+        selfConsume: er.battery.selfConsume,
+        totalGridImport: er.battery.totalGridImport,
+        totalSelfConsume: er.battery.selfConsume.reduce((a, b) => a + b, 0),
+        totalBattDischarge: er.battery.totalDischarged,
+        selfPoweredPct: er.battery.selfPoweredPct,
+      }
+    }
+    return simulateBattery(totalLoad, solar)
+  }, [er, totalLoad, solar])
   const maxVal = useMemo(() => Math.max(...totalLoad, ...solar) * 1.15, [totalLoad, solar])
 
   const xPos = useCallback((h) => padL + (h / 23) * chartW, [])

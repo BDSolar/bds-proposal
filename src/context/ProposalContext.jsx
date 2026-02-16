@@ -1,4 +1,5 @@
 import { createContext, useContext, useReducer } from 'react'
+import { calculateProposal } from '../engine/calculateProposal'
 
 const initialState = {
   customer: {
@@ -29,6 +30,7 @@ const initialState = {
   proposal: { date: new Date().toISOString().split('T')[0] },
   currentStep: 0,
   formSubmitted: false,
+  engineResults: null,
 }
 
 function reducer(state, action) {
@@ -43,18 +45,26 @@ function reducer(state, action) {
       return { ...state, currentStep: action.payload }
     case 'SUBMIT_FORM': {
       const qb = parseFloat(state.customer.quarterlyBill) || 0
+      const updatedCustomer = {
+        ...state.customer,
+        annualBill: (qb * 4).toFixed(0),
+      }
+      // Run the calculation engine
+      const results = calculateProposal({
+        customer: updatedCustomer,
+        rep: state.rep,
+        proposal: state.proposal,
+      })
       return {
         ...state,
         formSubmitted: true,
-        customer: {
-          ...state.customer,
-          annualBill: (qb * 4).toFixed(0),
-        },
+        customer: updatedCustomer,
+        engineResults: results,
         currentStep: 1,
       }
     }
     case 'EDIT_FORM':
-      return { ...state, formSubmitted: false, currentStep: 0 }
+      return { ...state, formSubmitted: false, currentStep: 0, engineResults: null }
     case 'RESET':
       return initialState
     default:

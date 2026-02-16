@@ -1,4 +1,5 @@
 import { useMemo, useState, useCallback } from 'react'
+import { useProposal } from '../context/ProposalContext'
 import Hero from '../components/Hero'
 import ScrollSection from '../components/ScrollSection'
 import StickyBeatChart from '../components/StickyBeatChart'
@@ -8,18 +9,20 @@ import { catmullRomPath } from '../utils/catmullRom'
 import systemConfig from '../data/systemConfig'
 import '../styles/sections/s3.css'
 
-const cfg = systemConfig
 const W = 1000, H = 380
 const padL = 55, padR = 20, padT = 20, padB = 50
 const chartW = W - padL - padR
 const chartH = H - padT - padB
 
 export default function S3_AddingSolar() {
+  const { state } = useProposal()
+  const er = state.engineResults
+  const cfg = er ? { system: { arrayKw: er.system.panels.totalKw }, tariff: er.assumptions.tariff } : systemConfig
   const [activeBeat, setActiveBeat] = useState(0)
 
-  const totalLoad = useMemo(() => getTotalLoad(), [])
-  const solar = useMemo(() => getSolarForSystemSize(cfg.system.arrayKw), [])
-  const dailySolar = useMemo(() => getDailyProduction(solar), [solar])
+  const totalLoad = useMemo(() => er ? er.totalLoad : getTotalLoad(), [er])
+  const solar = useMemo(() => er ? er.solarProduction : getSolarForSystemSize(systemConfig.system.arrayKw), [er])
+  const dailySolar = useMemo(() => er ? solar.reduce((a, b) => a + b, 0) : getDailyProduction(solar), [er, solar])
   const maxVal = useMemo(() => Math.max(...totalLoad, ...solar) * 1.15, [totalLoad, solar])
 
   const xPos = useCallback((h) => padL + (h / 23) * chartW, [])

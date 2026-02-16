@@ -1,12 +1,103 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
+import { useProposal } from '../context/ProposalContext'
 import Hero from '../components/Hero'
 import ScrollSection from '../components/ScrollSection'
 import systemConfig from '../data/systemConfig'
 import '../styles/sections/s8.css'
 
-const cfg = systemConfig
+function buildAccordionSections(cfg, er) {
+  // Use engine assumptions if available, otherwise fall back to static config
+  if (er) {
+    const a = er.assumptions
+    return [
+      {
+        id: 'tariff', icon: '\u26a1', iconClass: 'icon-tariff',
+        title: 'Electricity Tariff', desc: 'Your current rates and pricing structure',
+        rows: [
+          ['Import Rate', `$${a.tariff.rate.toFixed(2)}/kWh`],
+          ['Daily Supply Charge', `$${a.tariff.supply.toFixed(2)}/day`],
+          ['Feed-in Tariff (Export)', `$${a.tariff.fit.toFixed(2)}/kWh`],
+          ['Tariff Type', a.tariff.tariffType],
+          ['Distribution Network', a.tariff.network],
+          ['Retailer', a.tariff.retailer],
+        ],
+        note: 'Based on your current electricity retailer plan. Rates are inclusive of GST.',
+      },
+      {
+        id: 'solar', icon: '\u2600\ufe0f', iconClass: 'icon-solar',
+        title: 'Solar Production', desc: 'How we estimate your system\u2019s output',
+        rows: [
+          ['Panel', `${a.solar.brand} ${a.solar.model}`],
+          ['Panel Wattage', `${a.solar.wattage}W`],
+          ['Number of Panels', `\u00d7 ${a.solar.panelCount}`],
+          ['Total System Size', `${a.solar.totalKw} kW`],
+          ['Panel Efficiency', `${a.solar.efficiency}%`],
+          ['Cell Technology', `${a.solar.technology}`],
+          ['Orientation / Tilt', `${a.solar.orientation}, ${a.solar.tilt}\u00b0`],
+          ['Peak Sun Hours', `${a.solar.peakSunHours} hrs/day`],
+          ['Daily Production (Yr 1)', `${a.solar.dailyProduction} kWh`],
+          ['Annual Production (Yr 1)', `${a.solar.annualProduction.toLocaleString()} kWh`],
+          ['System Losses', `${a.solar.systemLosses}%`],
+          ['Location', a.solar.location],
+        ],
+        note: 'Solar irradiance data is sourced from the Bureau of Meteorology. Production estimates account for real-world losses.',
+      },
+      {
+        id: 'battery', icon: '\ud83d\udd0b', iconClass: 'icon-battery',
+        title: 'Battery & Storage', desc: 'Storage capacity and performance specs',
+        rows: [
+          ['Battery System', `${a.battery.brand} ${a.battery.model}`],
+          ['Total Capacity', `${a.battery.totalCapacity} kWh`],
+          ['Usable Capacity', `${a.battery.usableCapacity} kWh`],
+          ['Modules', `${a.battery.modules} \u00d7 ${a.battery.capacityPerModule} kWh`],
+          ['Chemistry', a.battery.chemistry],
+          ['Cycle Life', a.battery.cycles],
+          ['Hybrid Inverter', `${a.battery.inverterSize} kW`],
+          ['DC EV Charger', `${a.battery.evChargerKw} kW`],
+          ['Round-Trip Efficiency', `${a.battery.roundTripEfficiency}%`],
+          ['Depth of Discharge', `${a.battery.depthOfDischarge}%`],
+        ],
+        note: 'Manufacturer specifications from SigEnergy.',
+      },
+      {
+        id: 'degradation', icon: '\ud83d\udcc9', iconClass: 'icon-degradation',
+        title: 'Degradation & Longevity', desc: 'How performance changes over time',
+        rows: [
+          ['Solar Degradation', `${a.degradation.solar}% per year`],
+          ['Solar Output at Year 25', `\u2265 ${(100 - a.degradation.solar * 25).toFixed(1)}%`],
+          ['Battery Degradation', `${a.degradation.battery}% per year`],
+        ],
+        note: 'Our 150% oversizing means degradation won\u2019t impact your $0 bill outcome.',
+      },
+      {
+        id: 'financial', icon: '\ud83d\udcb0', iconClass: 'icon-financial',
+        title: 'Financial Projections', desc: 'Cost escalation and savings methodology',
+        rows: [
+          ['System Cost (installed)', `$${a.financial.systemCost.toLocaleString()}`],
+          ['Annual Usage', `${a.financial.annualUsage.toLocaleString()} kWh/yr`],
+          ['Electricity Escalation Rate', `${(a.tariff.escalation * 100).toFixed(0)}% per year`],
+          ['Projection Period', `${a.financial.years} years`],
+        ],
+        note: 'Historical electricity price increases in Australia have averaged 5\u20137% per year.',
+      },
+      {
+        id: 'guarantee', icon: '\u2705', iconClass: 'icon-guarantee',
+        title: 'Bill-to-Zero Guarantee', desc: 'How the guarantee works',
+        rows: [
+          ['System Oversizing', `${a.guarantee.coverageRatio}% of usage`],
+          ['Guaranteed Electricity Bill', `$0`],
+          ['Guarantee Provider', 'Black Diamond Solar'],
+          ['What If Bill \u2260 $0?', 'BDS pays the remaining balance'],
+        ],
+        note: a.guarantee.guarantee,
+      },
+    ]
+  }
+  // Fall back to static config
+  return null
+}
 
-const ACCORDION_SECTIONS = [
+const STATIC_ACCORDION_SECTIONS = [
   {
     id: 'tariff',
     icon: '\u26a1',
@@ -125,7 +216,14 @@ const ChevronDown = () => (
 )
 
 export default function S8_Assumptions() {
+  const { state } = useProposal()
+  const er = state.engineResults
+  const cfg = systemConfig
   const [openId, setOpenId] = useState(null)
+
+  const accordionSections = useMemo(() => {
+    return buildAccordionSections(cfg, er) || STATIC_ACCORDION_SECTIONS
+  }, [er])
 
   const toggle = useCallback((id) => {
     setOpenId(prev => prev === id ? null : id)
@@ -138,7 +236,7 @@ export default function S8_Assumptions() {
       <ScrollSection>
         <div className="section-label">Assumptions</div>
         <div className="s8-accordion-group">
-          {ACCORDION_SECTIONS.map(section => (
+          {accordionSections.map(section => (
             <div
               key={section.id}
               className={`s8-accordion-item${openId === section.id ? ' open' : ''}`}
@@ -176,7 +274,7 @@ export default function S8_Assumptions() {
         <div className="s8-guarantee-callout">
           <div className="s8-guarantee-icon">{'\ud83d\udee1\ufe0f'}</div>
           <div className="s8-guarantee-title">Your bill is <span className="green">guaranteed $0</span></div>
-          <div className="s8-guarantee-text">We don&rsquo;t just estimate &mdash; we guarantee. Your system is oversized to {cfg.financial.coverageRatio}% of your usage, and if anything falls short, we pay the difference. No asterisks, no exceptions.</div>
+          <div className="s8-guarantee-text">We don&rsquo;t just estimate &mdash; we guarantee. Your system is oversized to {er ? er.system.coverageRatio : cfg.financial.coverageRatio}% of your usage, and if anything falls short, we pay the difference. No asterisks, no exceptions.</div>
           <div className="s8-guarantee-tag">&check; Bill-to-Zero Guarantee</div>
         </div>
       </ScrollSection>

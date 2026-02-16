@@ -3,7 +3,7 @@ import { useProposal } from '../context/ProposalContext'
 import Hero from '../components/Hero'
 import ScrollSection from '../components/ScrollSection'
 import useAnimateOnScroll from '../hooks/useAnimateOnScroll'
-import { loadComponents, getTotalLoad, getDailyTotal, hours, timeLabels, timeFull } from '../data/loadProfile'
+import { loadComponents as staticLoadComponents, getTotalLoad, getDailyTotal, hours, timeLabels, timeFull } from '../data/loadProfile'
 import { catmullRomPath } from '../utils/catmullRom'
 import '../styles/sections/s2.css'
 
@@ -12,15 +12,29 @@ const padL = 55, padR = 20, padT = 20, padB = 50
 const chartW = W - padL - padR
 const chartH = H - padT - padB
 
+const COMPONENT_META = [
+  { key: 'baseLoad', label: 'Base Load', color: '#e000f0' },
+  { key: 'hotWater', label: 'Hot Water', color: '#f5a623' },
+  { key: 'cooking', label: 'Cooking', color: '#ffd60a' },
+  { key: 'evCharging', label: 'EV Charging', color: '#30d158' },
+  { key: 'lighting', label: 'Lighting', color: '#a78bfa' },
+]
+
 export default function S2_EnergyLife() {
   const { state } = useProposal()
   const { customer } = state
+  const er = state.engineResults
   const [hoverHour, setHoverHour] = useState(null)
   const tooltipRef = useRef(null)
   const [chartRef, isChartVisible] = useAnimateOnScroll(0.15)
 
-  const totalLoad = useMemo(() => getTotalLoad(), [])
-  const dailyTotal = useMemo(() => getDailyTotal(), [])
+  const totalLoad = useMemo(() => er ? er.totalLoad : getTotalLoad(), [er])
+  const dailyTotal = useMemo(() => er ? er.dailyTotal : getDailyTotal(), [er])
+
+  const loadComponents = useMemo(() => {
+    if (!er) return staticLoadComponents
+    return COMPONENT_META.map(m => ({ ...m, data: er.loadProfiles[m.key] }))
+  }, [er])
   const maxVal = useMemo(() => Math.max(...totalLoad) * 1.15, [totalLoad])
 
   const xPos = useCallback((h) => padL + (h / 23) * chartW, [])

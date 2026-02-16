@@ -1,4 +1,5 @@
 import { useMemo, useEffect, useRef } from 'react'
+import { useProposal } from '../context/ProposalContext'
 import Hero from '../components/Hero'
 import ScrollSection from '../components/ScrollSection'
 import useAnimateOnScroll from '../hooks/useAnimateOnScroll'
@@ -34,24 +35,44 @@ function AnimatedCounter({ target, prefix = '$', duration = 2000 }) {
 }
 
 export default function S6_MoneyOverTime() {
+  const { state } = useProposal()
+  const er = state.engineResults
   const [chartRef, isChartVisible] = useAnimateOnScroll(0.15)
 
   const cfg = systemConfig
-  const projection = useMemo(() => project20Years({
-    dailyUsage: cfg.financial.dailyUsage,
-    rate: cfg.tariff.rate,
-    supply: cfg.tariff.supply,
-    fit: cfg.tariff.fit,
-    escalation: cfg.tariff.escalation,
-    systemCost: cfg.financial.systemCost,
-    degradation: cfg.financial.degradation,
-    dailySolarProduction: cfg.system.dailyProduction,
-    dailyExportKwh: cfg.financial.exportKwhDaily,
-  }), [])
+  const projection = useMemo(() => {
+    if (er) {
+      // Build projection data from engine financial results
+      const fin = er.financial
+      return {
+        data: fin.yearlyGridCost.map((gc, i) => ({
+          year: fin.startYear + i,
+          yearIndex: i + 1,
+          gridAnnual: gc,
+          gridCumulative: fin.cumulativeGridCost[i],
+          solarCumulative: fin.cumulativeGridCost[i] + fin.cumulativeSolarNet[i],
+          netSavings: -fin.cumulativeSolarNet[i],
+        })),
+        breakevenYear: fin.paybackYear,
+      }
+    }
+    return project20Years({
+      dailyUsage: cfg.financial.dailyUsage,
+      rate: cfg.tariff.rate,
+      supply: cfg.tariff.supply,
+      fit: cfg.tariff.fit,
+      escalation: cfg.tariff.escalation,
+      systemCost: cfg.financial.systemCost,
+      degradation: cfg.financial.degradation,
+      dailySolarProduction: cfg.system.dailyProduction,
+      dailyExportKwh: cfg.financial.exportKwhDaily,
+    })
+  }, [er])
 
   const { data, breakevenYear } = projection
   const maxY = Math.max(...data.map(d => d.gridCumulative)) * 1.05
-  const totalSavings = data[data.length - 1].netSavings
+  const totalSavings = er ? er.financial.totalSavings20yr : data[data.length - 1].netSavings
+  const investmentCost = er ? er.financial.systemCost : systemConfig.financial.systemCost
 
   const xPos = (i) => padL + (i / (data.length - 1)) * chartW
   const yPos = (val) => padT + chartH - (val / maxY) * chartH
@@ -149,7 +170,7 @@ export default function S6_MoneyOverTime() {
       <ScrollSection>
         <div className="s6-stats-row">
           <div className="s6-stat-card">
-            <div className="stat-value green">${systemConfig.financial.systemCost.toLocaleString()}</div>
+            <div className="stat-value green">${investmentCost.toLocaleString()}</div>
             <div className="stat-label">System Investment</div>
           </div>
           <div className="s6-stat-card">
@@ -175,7 +196,7 @@ export default function S6_MoneyOverTime() {
             <AnimatedCounter target={totalSavings} prefix="$" duration={2000} />
           </div>
           <div className="s6-savings-context">
-            Instead of paying <span className="red">${data[data.length - 1].gridCumulative.toLocaleString()}</span> to the grid, you invest <span className="green">${systemConfig.financial.systemCost.toLocaleString()}</span> once and save the rest.
+            Instead of paying <span className="red">${data[data.length - 1].gridCumulative.toLocaleString()}</span> to the grid, you invest <span className="green">${investmentCost.toLocaleString()}</span> once and save the rest.
           </div>
         </div>
       </section>

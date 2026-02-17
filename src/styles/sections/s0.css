@@ -171,9 +171,6 @@
   justify-content: center;
   gap: 20px;
   margin-top: 28px;
-  padding: 20px 0;
-  border-top: 1px solid var(--separator);
-  border-bottom: 1px solid var(--separator);
 }
 .certainty-number {
   font-size: 3.5rem;
@@ -183,6 +180,11 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   line-height: 1;
+  animation: pulse-scale 3s ease-in-out infinite;
+}
+@keyframes pulse-scale {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
 }
 .certainty-warranty-text {
   font-size: 0.85rem;

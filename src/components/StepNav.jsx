@@ -3,15 +3,15 @@ import { useProposal } from '../context/ProposalContext'
 import '../styles/nav.css'
 
 const STEP_LABELS = [
-  'Data Capture',
+  'Get Started',
   'About Us',
   'Your Proposal',
   'The Problem',
-  'Energy Life',
-  'Adding Solar',
-  'Adding Battery',
+  'Your Energy Life',
+  'Solar Solution',
+  'Battery Storage',
   'Before & After',
-  'Money Over Time',
+  'Savings Over Time',
   'Your System',
   'Assumptions',
 ]
@@ -116,16 +116,14 @@ export default function StepNav() {
         {/* Section picker menu */}
         <div className={`pill-menu${menuOpen ? ' open' : ''}`}>
           {STEP_LABELS.map((name, i) => (
-            i === 0 ? null : (
-              <button
-                key={i}
-                className={`pill-menu-item${i === currentStep ? ' active' : ''}`}
-                onClick={() => jumpTo(i)}
-              >
-                <span className="pill-menu-num">{String(i).padStart(2, '0')}</span>
-                {name}
-              </button>
-            )
+            <button
+              key={i}
+              className={`pill-menu-item${i === currentStep ? ' active' : ''}`}
+              onClick={() => jumpTo(i)}
+            >
+              <span className="pill-menu-num">{String(i).padStart(2, '0')}</span>
+              {name}
+            </button>
           ))}
         </div>
       </nav>

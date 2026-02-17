@@ -1,3 +1,4 @@
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useProposal } from '../context/ProposalContext'
 import '../styles/nav.css'
 
@@ -15,49 +16,122 @@ const STEP_LABELS = [
   'Assumptions',
 ]
 
+const TOTAL_STEPS = STEP_LABELS.length
+
 export default function StepNav() {
   const { state, dispatch } = useProposal()
   const { currentStep } = state
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef(null)
 
-  // Only show nav after form is submitted (step >= 1)
   const isVisible = state.formSubmitted || currentStep > 0
+  const isFirst = currentStep <= 1
+  const isLast = currentStep >= TOTAL_STEPS - 1
+  const pct = (currentStep / (TOTAL_STEPS - 1)) * 100
+  const label = `Section ${String(currentStep).padStart(2, '0')} \u2014 ${STEP_LABELS[currentStep]}`
+
+  const goBack = useCallback(() => {
+    if (currentStep > 1) {
+      dispatch({ type: 'SET_STEP', payload: currentStep - 1 })
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }, [currentStep, dispatch])
+
+  const goNext = useCallback(() => {
+    if (currentStep < TOTAL_STEPS - 1) {
+      dispatch({ type: 'SET_STEP', payload: currentStep + 1 })
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }, [currentStep, dispatch])
+
+  function jumpTo(i) {
+    dispatch({ type: 'SET_STEP', payload: i })
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    setMenuOpen(false)
+  }
+
+  // Close menu on outside click
+  useEffect(() => {
+    if (!menuOpen) return
+    function handleClick(e) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [menuOpen])
+
+  // Keyboard navigation (arrow keys)
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (currentStep === 0) return
+      if (menuOpen && e.key === 'Escape') { setMenuOpen(false); return }
+      const tag = e.target.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
+
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault()
+        goBack()
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault()
+        goNext()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [currentStep, goBack, goNext, menuOpen])
 
   return (
-    <nav className={`step-nav${isVisible ? ' visible' : ''}`}>
-      <div className="step-nav-inner">
-        <div className="step-nav-logo">
-          <svg viewBox="0 0 22 22" fill="none">
-            <path d="M7 8 L11 4 L15 8 L11 18 Z" stroke="url(#nGrad)" strokeWidth="1.2" fill="none" />
-            <path d="M7 8 L15 8" stroke="url(#nGrad)" strokeWidth="1" />
-            <defs>
-              <linearGradient id="nGrad" x1="0" y1="0" x2="22" y2="22">
-                <stop offset="0%" stopColor="#e000f0" />
-                <stop offset="100%" stopColor="#a020f0" />
-              </linearGradient>
-            </defs>
-          </svg>
-          Black Diamond Solar
+    <>
+      <nav className={`pill-nav${isVisible ? ' visible' : ''}`} ref={menuRef}>
+        <div className="pill-progress">
+          <div className="pill-progress-fill" style={{ width: `${pct}%` }} />
         </div>
+        <button
+          className="pill-arrow"
+          onClick={goBack}
+          disabled={isFirst}
+          aria-label="Previous step"
+        >
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M10 3L5 8l5 5" />
+          </svg>
+        </button>
+        <button className="pill-label" onClick={() => setMenuOpen(!menuOpen)}>
+          {label}
+        </button>
+        <button
+          className={`pill-arrow${isLast ? ' hidden' : ''}`}
+          onClick={goNext}
+          disabled={isLast}
+          aria-label="Next step"
+        >
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 3l5 5-5 5" />
+          </svg>
+        </button>
 
-        <div className="step-dots">
-          {STEP_LABELS.map((label, i) => (
-            <div
-              key={i}
-              className={`step-dot${i === currentStep ? ' active' : ''}${i < currentStep ? ' completed' : ''}`}
-              data-label={label}
-              onClick={() => {
-                if (i <= currentStep || state.formSubmitted) {
-                  dispatch({ type: 'SET_STEP', payload: i })
-                }
-              }}
-            />
+        {/* Section picker menu */}
+        <div className={`pill-menu${menuOpen ? ' open' : ''}`}>
+          {STEP_LABELS.map((name, i) => (
+            i === 0 ? null : (
+              <button
+                key={i}
+                className={`pill-menu-item${i === currentStep ? ' active' : ''}`}
+                onClick={() => jumpTo(i)}
+              >
+                <span className="pill-menu-num">{String(i).padStart(2, '0')}</span>
+                {name}
+              </button>
+            )
           ))}
         </div>
+      </nav>
 
-        <div className="step-current-label">
-          {STEP_LABELS[currentStep]}
-        </div>
-      </div>
-    </nav>
+      {/* Backdrop */}
+      {menuOpen && <div className="pill-backdrop" onClick={() => setMenuOpen(false)} />}
+    </>
   )
 }

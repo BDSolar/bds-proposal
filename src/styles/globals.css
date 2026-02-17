@@ -148,5 +148,6 @@ body { font-family: 'Outfit', sans-serif; background: var(--bg-primary); color: 
   padding-top: 0;
 }
 .app-content.nav-visible {
-  padding-top: 56px;
+  padding-top: 0;
+  padding-bottom: 100px;
 }

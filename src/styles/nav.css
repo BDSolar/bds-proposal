@@ -1,171 +1,204 @@
 /* ============================================================
-   STEP NAV — Fixed top bar
+   FLOATING PILL NAV — Single bottom-center navigation
    ============================================================ */
-.step-nav {
+
+.pill-nav {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 200;
-  background: rgba(0,0,0,0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--separator);
-  transform: translateY(-100%);
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.step-nav.visible { transform: translateY(0); }
-
-.step-nav-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 12px 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.step-nav-logo {
-  font-family: 'Outfit', sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text-primary);
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.step-nav-logo svg { width: 22px; height: 22px; }
-
-/* Progress dots */
-.step-dots {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.step-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--bg-elevated);
-  border: 1px solid var(--separator-hover);
-  transition: all 0.3s ease;
-  cursor: pointer;
-  position: relative;
-}
-.step-dot.active {
-  background: var(--accent);
-  border-color: var(--accent);
-  box-shadow: 0 0 8px rgba(224,0,240,0.4);
-}
-.step-dot.completed {
-  background: var(--accent-dark);
-  border-color: var(--accent-dark);
-}
-.step-dot:hover::after {
-  content: attr(data-label);
-  position: absolute;
-  top: calc(100% + 8px);
+  bottom: 28px;
   left: 50%;
-  transform: translateX(-50%);
-  background: var(--bg-elevated);
-  border: 1px solid var(--separator-hover);
-  border-radius: 6px;
-  padding: 4px 10px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9px;
-  letter-spacing: 1px;
-  color: var(--text-secondary);
-  white-space: nowrap;
-  pointer-events: none;
-  z-index: 10;
-}
-
-/* Step label */
-.step-current-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--text-tertiary);
-  min-width: 100px;
-  text-align: right;
-}
-
-/* ============================================================
-   STEP BUTTONS — Fixed bottom bar
-   ============================================================ */
-.step-buttons {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  transform: translateX(-50%) translateY(100px);
   z-index: 200;
-  background: rgba(0,0,0,0.9);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 48px;
+  padding: 0 8px;
+  border-radius: 60px;
+  background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid var(--separator);
-  padding: 16px 24px;
+  border: 1px solid var(--separator-hover);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.3s ease;
+}
+
+.pill-nav:hover {
+  border-color: rgba(224, 0, 240, 0.35);
+  box-shadow: 0 0 20px rgba(224, 0, 240, 0.08);
+}
+
+.pill-nav.visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Progress bar — thin magenta line along top */
+.pill-progress {
+  position: absolute;
+  top: 0;
+  left: 16px;
+  right: 16px;
+  height: 2px;
+  pointer-events: none;
+}
+
+.pill-progress-fill {
+  height: 100%;
+  border-radius: 1px;
+  background: var(--accent);
+  transition: width 0.4s ease;
+}
+
+/* Arrow buttons */
+.pill-arrow {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-}
-
-.step-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 28px;
-  font-family: 'Outfit', sans-serif;
-  font-size: 0.95rem;
-  font-weight: 600;
-  border-radius: 60px;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
   border: none;
-  outline: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: color 0.2s ease, background 0.2s ease;
+  flex-shrink: 0;
 }
-.step-btn svg { width: 16px; height: 16px; transition: transform 0.3s ease; }
 
-.step-btn-back {
-  --border-angle: 0deg;
-  border: 2px solid transparent !important;
-  background:
-    var(--bg-primary) padding-box,
-    conic-gradient(from var(--border-angle), transparent 40%, rgba(224,0,240,0.15) 55%, #e000f0 72%, #ff60ff 80%, #e000f0 88%, rgba(224,0,240,0.15) 95%, transparent 100%) border-box;
-  color: var(--text-secondary);
-  animation: borderTrace 3s linear infinite;
+.pill-arrow:hover:not(:disabled) {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.06);
 }
-.step-btn-back:hover {
+
+.pill-arrow:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.pill-arrow.hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.pill-arrow svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Center label — clickable */
+.pill-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  padding: 0 8px;
+  user-select: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.pill-label:hover {
   color: var(--text-primary);
 }
-.step-btn-back:hover svg { transform: translateX(-3px); }
-.step-btn-back:disabled { opacity: 0.3; cursor: default; pointer-events: none; animation: none; }
 
-@property --border-angle {
-  syntax: '<angle>';
-  initial-value: 0deg;
-  inherits: false;
+/* ============================================================
+   SECTION PICKER MENU — pops up from the pill
+   ============================================================ */
+.pill-menu {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--separator-hover);
+  border-radius: 16px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 220px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.step-btn-next {
-  --border-angle: 0deg;
-  border: 2px solid transparent !important;
-  background:
-    var(--gradient-accent) padding-box,
-    conic-gradient(from var(--border-angle), transparent 40%, rgba(224,0,240,0.15) 55%, #e000f0 72%, #ff60ff 80%, #e000f0 88%, rgba(224,0,240,0.15) 95%, transparent 100%) border-box;
-  color: white;
-  box-shadow: 0 4px 20px rgba(224,0,240,0.25);
-  animation: borderTrace 3s linear infinite;
+.pill-menu.open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
 }
-.step-btn-next:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 28px rgba(224,0,240,0.35);
-}
-.step-btn-next:hover svg { transform: translateX(3px); }
 
-@keyframes borderTrace {
-  to { --border-angle: 360deg; }
+.pill-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 14px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-align: left;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.pill-menu-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary);
+}
+
+.pill-menu-item.active {
+  color: var(--accent);
+  background: rgba(224, 0, 240, 0.08);
+}
+
+.pill-menu-num {
+  color: var(--text-tertiary);
+  font-size: 9px;
+  min-width: 16px;
+}
+
+.pill-menu-item.active .pill-menu-num {
+  color: var(--accent);
+}
+
+/* Backdrop behind menu */
+.pill-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 199;
+}
+
+/* Mobile: pill stretches */
+@media (max-width: 600px) {
+  .pill-nav {
+    width: calc(100% - 32px);
+    justify-content: space-between;
+  }
+
+  .pill-label {
+    font-size: 8px;
+    letter-spacing: 1.5px;
+    flex: 1;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }

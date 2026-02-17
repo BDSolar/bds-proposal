@@ -1,6 +1,5 @@
 import { useProposal } from './context/ProposalContext'
 import StepNav from './components/StepNav'
-import StepButtons from './components/StepButtons'
 import S0b_DataCapture from './sections/S0b_DataCapture'
 import S0_AboutUs from './sections/S0_AboutUs'
 import S0b_ProposalIntro from './sections/S0b_ProposalIntro'
@@ -42,7 +41,6 @@ export default function App() {
       <div className={`app-content${showNav ? ' nav-visible' : ''}`}>
         <CurrentSection />
       </div>
-      <StepButtons />
     </>
   )
 }

@@ -1,6 +1,6 @@
 import DiamondLogo from './DiamondLogo'
 
-export default function Hero({ badge, title, highlightText, subtitle }) {
+export default function Hero({ badge, title, highlightText, subtitle, children }) {
   return (
     <section className="hero">
       <DiamondLogo size={80} className="hero-logo" />
@@ -15,6 +15,7 @@ export default function Hero({ badge, title, highlightText, subtitle }) {
         )}
       </h1>
       {subtitle && <p className="hero-sub">{subtitle}</p>}
+      {children}
       <div className="scroll-cue">
         <span>Scroll</span>
         <div className="arrow"></div>

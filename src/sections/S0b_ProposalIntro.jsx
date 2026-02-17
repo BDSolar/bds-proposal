@@ -57,52 +57,58 @@ export default function S0b_ProposalIntro() {
       {/* Profile Card */}
       <ScrollSection>
         <div className="section-label">Your Details</div>
-        <div className="profile-card" style={{ position: 'relative' }}>
-          <button className="edit-btn" onClick={() => dispatch({ type: 'EDIT_FORM' })}>&#9998; Edit</button>
-          <div className="profile-header">
-            <div className="profile-avatar-ring">
-              <div className="profile-avatar">{initials}</div>
+        <div className="details-block">
+          <div className="profile-layout">
+            <div className="profile-card">
+              <button className="edit-btn" onClick={() => dispatch({ type: 'EDIT_FORM' })}>&#9998; Edit</button>
+              <div className="profile-card-name">{fullName}</div>
+              <div className="profile-card-address">{addressLine}</div>
+              <div className="profile-card-divider" />
+              <div className="profile-card-bill">
+                <div className="profile-card-bill-amount">${quarterlyBill.toLocaleString()}</div>
+                <div className="profile-card-bill-label">Quarterly Electricity Bill</div>
+              </div>
+              <div className="profile-card-divider" />
+              <div className="profile-card-specs">
+                <div className="profile-spec"><span className="profile-spec-label">Property</span><span className="profile-spec-value">{customer.propertyType}</span></div>
+                <div className="profile-spec"><span className="profile-spec-label">Storeys</span><span className="profile-spec-value">{storeysLabel}</span></div>
+                <div className="profile-spec"><span className="profile-spec-label">Household</span><span className="profile-spec-value">{householdLabel}</span></div>
+                <div className="profile-spec"><span className="profile-spec-label">Phase</span><span className="profile-spec-value">{customer.phase} Phase</span></div>
+              </div>
+              {(customer.hasPool || customer.hasEV || customer.hasAC || customer.hasHotWater) && (
+                <>
+                  <div className="profile-card-divider" />
+                  <div className="profile-card-features">
+                    {customer.hasPool && <span className="profile-feature">Pool</span>}
+                    {customer.hasEV && <span className="profile-feature">EV</span>}
+                    {customer.hasAC && <span className="profile-feature">Air Con</span>}
+                    {customer.hasHotWater && <span className="profile-feature">Hot Water</span>}
+                  </div>
+                </>
+              )}
+              {customer.notes && (
+                <>
+                  <div className="profile-card-divider" />
+                  <div className="profile-card-notes">
+                    <div className="profile-notes-label">Notes</div>
+                    <div className="profile-notes-text">{customer.notes}</div>
+                  </div>
+                </>
+              )}
             </div>
-            <div>
-              <div className="profile-name">{fullName}</div>
-              <div className="profile-address">{addressLine}</div>
-            </div>
+            {addressLine && (
+              <div className="aerial-view">
+                <iframe
+                  title="Property aerial view"
+                  src={`https://maps.google.com/maps?q=${encodeURIComponent(addressLine)}&t=k&z=20&output=embed&disableDefaultUI=1&maptype=satellite`}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              </div>
+            )}
           </div>
-          <div className="profile-details stagger-in visible">
-            <div className="profile-detail-item">
-              <div className="profile-detail-icon">&#127968;</div>
-              <div><div className="profile-detail-label">Property</div><div className="profile-detail-value">{customer.propertyType}</div></div>
-            </div>
-            <div className="profile-detail-item">
-              <div className="profile-detail-icon">&#128101;</div>
-              <div><div className="profile-detail-label">Household</div><div className="profile-detail-value">{householdLabel}</div></div>
-            </div>
-            <div className="profile-detail-item">
-              <div className="profile-detail-icon">&#128664;</div>
-              <div><div className="profile-detail-label">EV Owner</div><div className="profile-detail-value">{customer.hasEV ? 'Yes' : 'No'}</div></div>
-            </div>
-            <div className="profile-detail-item">
-              <div className="profile-detail-icon">&#127946;</div>
-              <div><div className="profile-detail-label">Pool</div><div className="profile-detail-value">{customer.hasPool ? 'Yes' : 'No'}</div></div>
-            </div>
-            <div className="profile-detail-item">
-              <div className="profile-detail-icon">&#9889;</div>
-              <div><div className="profile-detail-label">Phase</div><div className="profile-detail-value">{customer.phase} Phase</div></div>
-            </div>
-            <div className="profile-detail-item">
-              <div className="profile-detail-icon">&#127970;</div>
-              <div><div className="profile-detail-label">Storeys</div><div className="profile-detail-value">{storeysLabel}</div></div>
-            </div>
-          </div>
-        </div>
-      </ScrollSection>
-
-      {/* Energy Snapshot */}
-      <ScrollSection>
-        <div className="section-label">Current Energy Profile</div>
-        <div className="snapshot-heading">Here is where you stand today</div>
-        <div className="snapshot-sub">Based on your recent electricity bills, here is a snapshot of your current energy situation.</div>
-        <div className="stats-grid stagger-in visible">
+          <div className="stats-grid stagger-in visible">
           <div className="stat-card">
             <div className="stat-card-label">Tariff Rate</div>
             <div className="stat-card-value solar">${tariffRate.toFixed(2)}</div>
@@ -124,10 +130,23 @@ export default function S0b_ProposalIntro() {
             <div className="stat-card-unit">per year</div>
           </div>
         </div>
-        <div className="section-label" style={{ marginTop: 48 }}>What We Will Show You</div>
-        <div className="roadmap-heading">Your proposal at a glance</div>
-        <div className="roadmap-sub">We have built this proposal to walk you through every detail, so you can make an informed decision with full confidence.</div>
-        <div className="roadmap-steps stagger-in visible">
+        </div>
+      </ScrollSection>
+
+      {/* Roadmap */}
+      <ScrollSection>
+        <div className="section-label">What We Will Show You</div>
+        <div className="roadmap-block">
+          <div className="certainty-block">
+            <div className="certainty-headline">
+              <span className="certainty-left">Your proposal</span>
+              <span className="certainty-right mag">at a glance.</span>
+            </div>
+            <p className="certainty-body">
+              We&rsquo;ve built this proposal to walk you through every detail, so you can make an informed decision with full confidence.
+            </p>
+          </div>
+          <div className="roadmap-steps stagger-in visible">
           <div className="roadmap-step">
             <div className="roadmap-step-number">01</div>
             <div className="roadmap-step-icon">
@@ -144,33 +163,55 @@ export default function S0b_ProposalIntro() {
             <div className="roadmap-step-number">02</div>
             <div className="roadmap-step-icon">
               <svg viewBox="0 0 32 32" fill="none" stroke="url(#rmGrad)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M16 4 C16 4 6 12 6 18 C6 24 10 28 16 28 C22 28 26 24 26 18 C26 12 16 4 16 4Z" />
+                <path d="M12 20 Q16 16 20 20" />
+              </svg>
+            </div>
+            <div className="roadmap-step-title">Your Energy Life</div>
+            <div className="roadmap-step-desc">How your home consumes power across a typical 24-hour day, and why timing matters.</div>
+          </div>
+          <div className="roadmap-step">
+            <div className="roadmap-step-number">03</div>
+            <div className="roadmap-step-icon">
+              <svg viewBox="0 0 32 32" fill="none" stroke="url(#rmGrad)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="16" cy="16" r="5" />
                 <line x1="16" y1="3" x2="16" y2="7" />
                 <line x1="16" y1="25" x2="16" y2="29" />
                 <line x1="3" y1="16" x2="7" y2="16" />
                 <line x1="25" y1="16" x2="29" y2="16" />
-                <line x1="6.8" y1="6.8" x2="9.6" y2="9.6" />
-                <line x1="22.4" y1="22.4" x2="25.2" y2="25.2" />
-                <line x1="6.8" y1="25.2" x2="9.6" y2="22.4" />
-                <line x1="22.4" y1="9.6" x2="25.2" y2="6.8" />
+                <rect x="22" y="20" width="6" height="10" rx="1" />
+                <line x1="25" y1="24" x2="25" y2="27" />
               </svg>
             </div>
             <div className="roadmap-step-title">Solar + Battery</div>
             <div className="roadmap-step-desc">How solar panels and a battery work together to cover your usage around the clock.</div>
           </div>
           <div className="roadmap-step">
-            <div className="roadmap-step-number">03</div>
+            <div className="roadmap-step-number">04</div>
+            <div className="roadmap-step-icon">
+              <svg viewBox="0 0 32 32" fill="none" stroke="url(#rmGrad)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="6" width="12" height="20" rx="2" />
+                <rect x="17" y="6" width="12" height="20" rx="2" />
+                <line x1="9" y1="12" x2="9" y2="22" />
+                <line x1="23" y1="16" x2="23" y2="22" />
+              </svg>
+            </div>
+            <div className="roadmap-step-title">Before & After</div>
+            <div className="roadmap-step-desc">A side-by-side look at your energy costs with and without solar and battery.</div>
+          </div>
+          <div className="roadmap-step">
+            <div className="roadmap-step-number">05</div>
             <div className="roadmap-step-icon">
               <svg viewBox="0 0 32 32" fill="none" stroke="url(#rmGrad)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="16" y1="3" x2="16" y2="29" />
                 <path d="M21 9 C21 7 19 5 16 5 C13 5 10 7 10 9.5 C10 12 12 13 16 14 C20 15 22 16.5 22 19.5 C22 22 19 24 16 24 C13 24 10 22 10 20" />
               </svg>
             </div>
-            <div className="roadmap-step-title">Your Savings</div>
-            <div className="roadmap-step-desc">A before-and-after comparison of your energy costs and the long-term financial picture.</div>
+            <div className="roadmap-step-title">The Financial Picture</div>
+            <div className="roadmap-step-desc">Your breakeven point, return on investment, and 20-year savings projection.</div>
           </div>
           <div className="roadmap-step">
-            <div className="roadmap-step-number">04</div>
+            <div className="roadmap-step-number">06</div>
             <div className="roadmap-step-icon">
               <svg viewBox="0 0 32 32" fill="none" stroke="url(#rmGrad)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <polygon points="13 2 6 18 14 18 11 30 26 12 17 12 22 2" />
@@ -179,14 +220,20 @@ export default function S0b_ProposalIntro() {
             <div className="roadmap-step-title">Your System</div>
             <div className="roadmap-step-desc">The exact hardware, warranties, and Bill-to-Zero guarantee tailored to your home.</div>
           </div>
+          </div>
         </div>
       </ScrollSection>
 
       {/* CTA */}
       <ScrollSection>
         <div className="cta-section">
-          <h2>Let us show you the<br /><span className="highlight">path to $0</span></h2>
-          <p>Everything in this proposal is based on your real usage data. No guesswork, no generic estimates.</p>
+          <div className="certainty-headline">
+            <span className="certainty-left">Your path to</span>
+            <span className="certainty-right mag">a $0 bill.</span>
+          </div>
+          <p className="certainty-body">
+            Everything in this proposal is built on your real usage data. No guesswork, no generic estimates &mdash; just a tailored plan to eliminate your electricity bill.
+          </p>
         </div>
       </ScrollSection>
     </div>

@@ -55,80 +55,107 @@ function AnimatedCounter({ target, prefix = '$', duration = 1500 }) {
   )
 }
 
-function BarChart({ yearlyData }) {
-  const svgRef = useRef(null)
+function CostChart({ yearlyData }) {
   const tooltipRef = useRef(null)
   const [chartRef, isVisible] = useAnimateOnScroll(0.15)
 
-  const maxCost = Math.max(...yearlyData.map(d => d.cost))
-  const W = 1000, H = 340
-  const padL = 60, padR = 20, padT = 10, padB = 40
+  // Use cumulative data — creates a steep hockey-stick curve
+  const maxVal = yearlyData[YEARS - 1].cumulative
+  const W = 1000, H = 580
+  const padL = 75, padR = 20, padT = 50, padB = 50
   const chartW = W - padL - padR
   const chartH = H - padT - padB
-  const barW = chartW / YEARS * 0.6
-  const gap = chartW / YEARS
 
-  const handleMouseEnter = useCallback((e, i) => {
-    const d = yearlyData[i]
-    const tooltip = tooltipRef.current
-    if (!tooltip) return
-    tooltip.querySelector('.tooltip-year').textContent = d.year
-    tooltip.querySelector('.tooltip-amount').textContent = `$${d.cost.toLocaleString()}`
-    tooltip.classList.add('active')
-    const bar = e.currentTarget
-    const container = bar.closest('.chart-area')?.getBoundingClientRect()
-    const rect = bar.getBoundingClientRect()
-    if (container) {
-      tooltip.style.left = (rect.left - container.left + rect.width / 2 - 60) + 'px'
-      tooltip.style.top = (rect.top - container.top - 60) + 'px'
-    }
-  }, [yearlyData])
+  const getX = i => padL + (i / (YEARS - 1)) * chartW
+  const getY = d => padT + chartH - (d.cumulative / maxVal) * chartH
 
-  const handleMouseLeave = useCallback(() => {
-    tooltipRef.current?.classList.remove('active')
-  }, [])
+  // Smooth curve through points (catmull-rom → cubic bezier)
+  const points = yearlyData.map((d, i) => ({ x: getX(i), y: getY(d) }))
+  let curvePath = `M${points[0].x},${points[0].y}`
+  for (let i = 0; i < points.length - 1; i++) {
+    const p0 = points[Math.max(0, i - 1)]
+    const p1 = points[i]
+    const p2 = points[i + 1]
+    const p3 = points[Math.min(points.length - 1, i + 2)]
+    const cp1x = p1.x + (p2.x - p0.x) / 6
+    const cp1y = p1.y + (p2.y - p0.y) / 6
+    const cp2x = p2.x - (p3.x - p1.x) / 6
+    const cp2y = p2.y - (p3.y - p1.y) / 6
+    curvePath += ` C${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`
+  }
+  const areaPath = `${curvePath} L${points[points.length - 1].x},${padT + chartH} L${points[0].x},${padT + chartH} Z`
 
   // Grid lines
   const gridLines = []
-  for (let i = 0; i <= 5; i++) {
-    const y = padT + (chartH / 5) * i
-    const val = Math.round(maxCost * (1 - i / 5))
+  for (let i = 0; i <= 4; i++) {
+    const y = padT + (chartH / 4) * i
+    const val = maxVal * (1 - i / 4)
     gridLines.push(
       <g key={`grid-${i}`}>
         <line x1={padL} y1={y} x2={W - padR} y2={y} className="grid-line" />
-        <text x={padL - 10} y={y + 3} className="y-label">${(val / 1000).toFixed(1)}k</text>
+        <text x={padL - 12} y={y + 4} className="y-label">${Math.round(val / 1000)}k</text>
       </g>
     )
   }
 
-  // Bars
-  const bars = yearlyData.map((d, i) => {
-    const x = padL + i * gap + (gap - barW) / 2
-    const barH = (d.cost / maxCost) * chartH
-    const y = padT + chartH - barH
-    const ratio = i / (YEARS - 1)
-    const r = Math.round(224 + ratio * 31)
-    const g = Math.round(0 + ratio * 69)
-    const b = Math.round(240 - ratio * 182)
+  // Milestone labels at 5-year increments (font grows with cost)
+  const milestones = [0, 4, 9, 14, 19] // years 1, 5, 10, 15, 20
+  const baseFontSize = 14
+  const maxFontSize = 28
+
+  // Hover dots + milestone labels
+  const dots = yearlyData.map((d, i) => {
+    const cx = getX(i)
+    const cy = getY(d)
+    const isMilestone = milestones.includes(i)
+    const milestoneIdx = milestones.indexOf(i)
+    const fontSize = isMilestone ? baseFontSize + (milestoneIdx / (milestones.length - 1)) * (maxFontSize - baseFontSize) : 0
 
     return (
       <g key={i}>
-        <defs>
-          <linearGradient id={`bg${i}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={`rgb(${r},${g},${b})`} />
-            <stop offset="100%" stopColor={`rgb(${r},${g},${b})`} stopOpacity="0.5" />
-          </linearGradient>
-        </defs>
-        <rect
-          className={`bar${isVisible ? ' bar-animate' : ''}`}
-          x={x} y={y} width={barW} height={barH}
-          fill={`url(#bg${i})`}
-          style={{ animationDelay: `${i * 0.04}s`, opacity: isVisible ? 1 : 0 }}
-          onMouseEnter={e => handleMouseEnter(e, i)}
-          onMouseLeave={handleMouseLeave}
+        <circle cx={cx} cy={cy} r="20" fill="transparent" className="hover-zone"
+          onMouseEnter={(e) => {
+            const tooltip = tooltipRef.current
+            if (!tooltip) return
+            tooltip.querySelector('.tooltip-year').textContent = d.year
+            tooltip.querySelector('.tooltip-amount').textContent = `$${d.cumulative.toLocaleString()}`
+            tooltip.classList.add('active')
+            const container = e.currentTarget.closest('.chart-wrap')?.getBoundingClientRect()
+            const svgRect = e.currentTarget.closest('svg')?.getBoundingClientRect()
+            if (container && svgRect) {
+              const scale = svgRect.width / W
+              tooltip.style.left = (cx * scale - 60) + 'px'
+              tooltip.style.top = (cy * scale - 60) + 'px'
+            }
+          }}
+          onMouseLeave={() => tooltipRef.current?.classList.remove('active')}
         />
-        {(i % 5 === 0 || i === YEARS - 1) && (
-          <text className="bar-label" x={x + barW / 2} y={H - 8}>{d.year}</text>
+        <circle cx={cx} cy={cy} r={isMilestone ? 5 : 3} className={`chart-dot${isVisible ? ' visible' : ''}`}
+          style={{ transitionDelay: `${1 + i * 0.04}s` }}
+        />
+        {isMilestone && (
+          <>
+            <line
+              x1={cx} y1={padT} x2={cx} y2={cy}
+              className={`milestone-line-dim${isVisible ? ' visible' : ''}`}
+              style={{ transitionDelay: `${1 + milestoneIdx * 0.2}s` }}
+            />
+            <line
+              x1={cx} y1={cy} x2={cx} y2={padT + chartH}
+              className={`milestone-line-bright${isVisible ? ' visible' : ''}`}
+              style={{ transitionDelay: `${1 + milestoneIdx * 0.2}s` }}
+            />
+            <text
+              x={i === YEARS - 1 ? cx - 40 : cx} y={i === YEARS - 1 ? cy - 12 : cy - fontSize - 6}
+              className={`milestone-price${isVisible ? ' visible' : ''}`}
+              style={{ fontSize: `${fontSize}px`, transitionDelay: `${1.2 + milestoneIdx * 0.2}s`, textAnchor: i === YEARS - 1 ? 'end' : 'middle' }}
+            >
+              ${Math.round(d.cumulative / 1000)}k
+            </text>
+          </>
+        )}
+        {isMilestone && (
+          <text className="bar-label" x={cx} y={H - 10}>{d.year}</text>
         )}
       </g>
     )
@@ -136,21 +163,39 @@ function BarChart({ yearlyData }) {
 
   return (
     <div ref={chartRef}>
-      <div className="chart-container">
-        <div className="chart-header">
-          <div className="chart-title">Projected Annual Electricity Costs</div>
-          <div className="chart-badge">&#9650; {(ESCALATION * 100).toFixed(1)}% annual escalation</div>
+      <div className="chart-wrap">
+        <svg className="chart-svg-full" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="curveFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#ff453a" stopOpacity="0.4" />
+              <stop offset="50%" stopColor="#e000f0" stopOpacity="0.15" />
+              <stop offset="100%" stopColor="#e000f0" stopOpacity="0.02" />
+            </linearGradient>
+            <linearGradient id="curveStroke" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#e000f0" />
+              <stop offset="70%" stopColor="#ff453a" />
+              <stop offset="100%" stopColor="#ff6b5a" />
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+            </filter>
+          </defs>
+          {gridLines}
+          <path d={areaPath} fill="url(#curveFill)" className={`curve-area${isVisible ? ' visible' : ''}`} />
+          <path d={curvePath} fill="none" stroke="url(#curveStroke)" strokeWidth="3.5"
+            strokeLinecap="round" strokeLinejoin="round" filter="url(#glow)"
+            className={`curve-line${isVisible ? ' visible' : ''}`}
+          />
+          {dots}
+        </svg>
+        <div className="s1-tooltip" ref={tooltipRef}>
+          <div className="tooltip-year"></div>
+          <div className="tooltip-amount"></div>
         </div>
-        <div className="chart-area">
-          <svg ref={svgRef} className="chart-svg" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet">
-            {gridLines}
-            {bars}
-          </svg>
-          <div className="s1-tooltip" ref={tooltipRef}>
-            <div className="tooltip-year"></div>
-            <div className="tooltip-amount"></div>
-          </div>
-        </div>
+      </div>
+      <div className="chart-footnote">
+        <span className="chart-footnote-icon">&#9650;</span> {(ESCALATION * 100).toFixed(1)}% annual escalation &middot; Cumulative electricity spend over 20 years
       </div>
     </div>
   )
@@ -178,10 +223,46 @@ export default function S1_TheProblem() {
         subtitle="Every year, energy costs climb higher. Here's what that really looks like over the next 20 years."
       />
 
+      {/* Global Energy Demand */}
+      <ScrollSection>
+        <div className="section-label">CNN Business &middot; Feb 2026</div>
+        <div className="headline-block">
+          <div className="certainty-headline">
+            <span className="certainty-left">The demand for power</span>
+            <span className="certainty-right mag">is driving us off-planet.</span>
+          </div>
+          <p className="headline-sub">Elon Musk just merged SpaceX and xAI to build data centres in space. The reason? Earth can&rsquo;t keep up.</p>
+          <p className="headline-body">
+            AI&rsquo;s hunger for electricity is now so extreme that the world&rsquo;s biggest companies are looking beyond Earth for answers. SpaceX has filed to launch up to <strong>1 million satellites</strong> as orbital data centres &mdash; powered entirely by solar energy in space, where panels produce <strong>up to 5&times; more power</strong> than on the ground.
+          </p>
+          <div className="headline-stats">
+            <div className="headline-stat">
+              <div className="headline-stat-number">4%</div>
+              <div className="headline-stat-label">of US electricity consumed<br />by data centres</div>
+            </div>
+            <div className="headline-stat">
+              <div className="headline-stat-number">3&times;</div>
+              <div className="headline-stat-label">projected growth<br />by 2030</div>
+            </div>
+            <div className="headline-stat">
+              <div className="headline-stat-number">267%</div>
+              <div className="headline-stat-label">electricity cost increase<br />near data centres</div>
+            </div>
+          </div>
+          <div className="headline-quote">
+            <blockquote>&ldquo;Global electricity demand for AI simply cannot be met with terrestrial solutions, even in the near term, without imposing hardship on communities and the environment.&rdquo;</blockquote>
+            <cite>&mdash; Elon Musk, SpaceX-xAI Merger Announcement</cite>
+          </div>
+          <p className="headline-closer">
+            The future of energy is <em>solar</em>.<br />Whether it&rsquo;s powering AI in space &mdash; or powering <em>your home</em> right here on the ground.
+          </p>
+        </div>
+      </ScrollSection>
+
       {/* Animated Annual Cost Counter */}
-      <section className="scroll-section">
-        <div className="section-inner visible cost-counter-section">
-          <div className="counter-label">Your current annual bill</div>
+      <ScrollSection>
+        <div className="section-label">Your Current Annual Bill</div>
+        <div className="cost-counter-section">
           <div className="counter-value">
             <AnimatedCounter target={year1.cost} />
           </div>
@@ -189,18 +270,18 @@ export default function S1_TheProblem() {
             Based on <strong>{parseFloat(dailyUsage).toFixed(0)} kWh/day</strong> at <strong>${parseFloat(tariffRate).toFixed(2)}/kWh</strong> + supply charges
           </div>
         </div>
-      </section>
+      </ScrollSection>
 
       {/* Bar Chart */}
       <ScrollSection>
         <div className="section-label">20-Year Projection</div>
-        <BarChart yearlyData={yearlyData} />
+        <CostChart yearlyData={yearlyData} />
         <div className="stats-row">
           <div className="s1-stat-card">
             <div className="stat-value">${year1.cost.toLocaleString()}</div>
             <div className="stat-label">Year 1 Bill</div>
           </div>
-          <div className="s1-stat-card danger">
+          <div className="s1-stat-card warning">
             <div className="stat-value">${year20.cost.toLocaleString()}</div>
             <div className="stat-label">Year 20 Bill</div>
           </div>
@@ -212,21 +293,27 @@ export default function S1_TheProblem() {
       </ScrollSection>
 
       {/* Cumulative */}
-      <section className="scroll-section">
-        <div className="section-inner visible cumulative-highlight">
+      <ScrollSection>
+        <div className="section-label">The Real Cost of Doing Nothing</div>
+        <div className="cumulative-highlight">
           <p className="lead-text">Over the next 20 years, doing nothing means<br />you&rsquo;ll hand your energy retailer&hellip;</p>
           <div className="cumulative-value">
             <AnimatedCounter target={year20.cumulative} prefix="$" duration={2000} />
           </div>
           <div className="cumulative-sub">Total electricity spend &middot; {START_YEAR}&ndash;{START_YEAR + YEARS - 1}</div>
         </div>
-      </section>
+      </ScrollSection>
 
       {/* CTA */}
       <ScrollSection>
         <div className="cta-section">
-          <h2>What if you could<br />bring that to <span className="highlight">$0?</span></h2>
-          <p>Let&rsquo;s see what your home looks like with solar and battery &mdash; and how fast you break even.</p>
+          <div className="certainty-headline">
+            <span className="certainty-left">What if you could</span>
+            <span className="certainty-right mag">bring that to $0?</span>
+          </div>
+          <p className="certainty-body">
+            Let&rsquo;s see what your home looks like with solar and battery &mdash; and how fast you break even.
+          </p>
         </div>
       </ScrollSection>
     </div>

@@ -81,8 +81,8 @@ export default function S5_BeforeAfter() {
     const battExportTotal = sim.gridExport.reduce((a, b) => a + b, 0)
 
     const noSolarDaily = totalUsage * rate + supply
-    const solarDaily = Math.max(0, solarTotalImport * rate + supply - solarExportTotal * fit)
-    const battDaily = Math.max(0, sim.totalGridImport * rate + supply - battExportTotal * fit)
+    const solarDaily = solarTotalImport * rate + supply - solarExportTotal * fit
+    const battDaily = sim.totalGridImport * rate + supply - battExportTotal * fit
 
     return {
       noSolar: {
@@ -243,9 +243,9 @@ export default function S5_BeforeAfter() {
           {/* Cost ticker */}
           <div className="s5-cost-ticker">
             <div className={`s5-cost-value ${scenario === 'no-solar' ? 'red' : scenario === 'solar-only' ? 'solar-color' : 'green'}`}>
-              ${current.dailyCost.toFixed(2)}
+              {current.dailyCost < 0 ? `-$${Math.abs(current.dailyCost).toFixed(2)}` : `$${current.dailyCost.toFixed(2)}`}
             </div>
-            <div className="s5-cost-label">/day &middot; ${current.annualCost.toLocaleString()}/year</div>
+            <div className="s5-cost-label">/day &middot; {current.annualCost < 0 ? `-$${Math.abs(current.annualCost).toLocaleString()}` : `$${current.annualCost.toLocaleString()}`}/year</div>
           </div>
         </div>
       </ScrollSection>
@@ -262,8 +262,8 @@ export default function S5_BeforeAfter() {
               <div className="s5-metric-label">{s.label}</div>
               <div className="s5-metric-row"><span>Grid Import</span><span>{s.gridImport.toFixed(1)} kWh</span></div>
               <div className="s5-metric-row"><span>Self-powered</span><span>{s.scPct}%</span></div>
-              <div className="s5-metric-row"><span>Daily Cost</span><span className={s.cls}>${s.dailyCost.toFixed(2)}</span></div>
-              <div className="s5-metric-row"><span>Annual Cost</span><span className={s.cls}>${s.annualCost.toLocaleString()}</span></div>
+              <div className="s5-metric-row"><span>Daily Cost</span><span className={s.cls}>{s.dailyCost < 0 ? `-$${Math.abs(s.dailyCost).toFixed(2)}` : `$${s.dailyCost.toFixed(2)}`}</span></div>
+              <div className="s5-metric-row"><span>Annual Cost</span><span className={s.cls}>{s.annualCost < 0 ? `-$${Math.abs(s.annualCost).toLocaleString()}` : `$${s.annualCost.toLocaleString()}`}</span></div>
             </div>
           ))}
         </div>

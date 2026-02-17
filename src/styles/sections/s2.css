@@ -3,20 +3,7 @@
    ============================================================ */
 
 .s2-chart-container {
-  background: var(--bg-secondary);
-  border: 1px solid var(--separator);
-  border-radius: var(--radius-lg);
-  padding: 32px 24px 20px;
   position: relative;
-  overflow: hidden;
-}
-.s2-chart-container::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: var(--gradient-accent);
-  opacity: 0.5;
 }
 
 .s2-chart-area {
@@ -161,6 +148,15 @@
   transform: translateY(-2px);
   border-color: rgba(224, 0, 240, 0.15);
 }
+.s2-stat-card .stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.s2-stat-card .stat-value.accent { background: var(--gradient-accent); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.s2-stat-card .stat-value.red { color: #ff453a; }
+.s2-stat-card .stat-value.yellow { color: var(--yellow); }
+.s2-stat-card .stat-label { font-size: 0.8rem; color: var(--text-secondary); }
 
 /* Insight callout */
 .s2-insight {
@@ -206,6 +202,5 @@
 }
 
 @media (max-width: 640px) {
-  .s2-chart-container { padding: 24px 16px 16px; }
   .s2-stats-row { grid-template-columns: 1fr 1fr; }
 }

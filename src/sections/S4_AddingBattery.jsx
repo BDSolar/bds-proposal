@@ -244,7 +244,7 @@ export default function S4_AddingBattery() {
             <div className="s4-compare-label green">Solar + Battery</div>
             <div className="s4-compare-row"><span>Grid Import</span><span className="green">{sim.totalGridImport.toFixed(1)} kWh</span></div>
             <div className="s4-compare-row"><span>Self-powered</span><span className="green">{sim.selfPoweredPct}%</span></div>
-            <div className="s4-compare-row"><span>Daily Cost</span><span className="green">${Math.max(0, sim.totalGridImport * cfg.tariff.rate + cfg.tariff.supply - sim.gridExport.reduce((a, b) => a + b, 0) * cfg.tariff.fit).toFixed(2)}</span></div>
+            <div className="s4-compare-row"><span>Daily Cost</span><span className="green">{(() => { const v = sim.totalGridImport * cfg.tariff.rate + cfg.tariff.supply - sim.gridExport.reduce((a, b) => a + b, 0) * cfg.tariff.fit; return v < 0 ? `-$${Math.abs(v).toFixed(2)}` : `$${v.toFixed(2)}`; })()}</span></div>
           </div>
         </div>
       </ScrollSection>

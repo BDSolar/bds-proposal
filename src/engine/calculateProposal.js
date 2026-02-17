@@ -127,7 +127,7 @@ function simulateSolarOnly(totalLoad, solarCurve, tariffRate, supplyCharge, fit)
   const totalSolar = solarCurve.reduce((a, b) => a + b, 0)
   const selfConsumptionPct = totalSolar > 0 ? Math.round((totalSelfConsumed / totalSolar) * 100) : 0
   const dailyCost = (totalGridImport * tariffRate) + supplyCharge - (totalExported * fit)
-  const annualCost = Math.round(Math.max(0, dailyCost) * 365)
+  const annualCost = Math.round(dailyCost * 365)
 
   return {
     selfConsumption,

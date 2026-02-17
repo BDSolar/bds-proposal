@@ -121,10 +121,6 @@ export default function S2_EnergyLife() {
         <div className="section-label">24-Hour Load Curve</div>
         <div ref={chartRef}>
           <div className="s2-chart-container">
-            <div className="chart-header">
-              <div className="chart-title">Your Daily Energy Usage</div>
-              <div className="chart-badge accent">{dailyTotal.toFixed(1)} kWh / day</div>
-            </div>
             <div className="chart-area s2-chart-area">
               <svg className="chart-svg" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet">
                 {/* Grid lines */}

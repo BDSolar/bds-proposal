@@ -3,17 +3,17 @@ import { useProposal } from '../context/ProposalContext'
 import '../styles/nav.css'
 
 const STEP_LABELS = [
-  'Get Started',
+  'Getting Started',
   'About Us',
   'Your Proposal',
   'The Problem',
   'Your Energy Life',
-  'Solar Solution',
-  'Battery Storage',
+  'Adding Solar',
+  'Adding Battery',
   'Before & After',
-  'Savings Over Time',
+  'The Financial Picture',
   'Your System',
-  'Assumptions',
+  'Transparency',
 ]
 
 const TOTAL_STEPS = STEP_LABELS.length

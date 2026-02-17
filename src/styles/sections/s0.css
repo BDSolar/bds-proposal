@@ -395,6 +395,31 @@
 .value-title { font-size: 1rem; font-weight: 600; margin-bottom: 8px; }
 .value-desc { font-size: 0.9rem; font-weight: 300; color: var(--text-secondary); line-height: 1.6; }
 
+/* Testimonial video */
+.testimonial-video {
+  margin-top: 20px;
+  text-align: center;
+}
+.testimonial-video video {
+  width: 100%;
+  max-width: 720px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--separator);
+}
+.testimonial-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 16px;
+}
+.testimonial-detail {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-top: 4px;
+}
+
 /* Guarantee card */
 .guarantee-card {
   background: var(--bg-secondary);

@@ -121,15 +121,15 @@ export default function S0_AboutUs() {
         </div>
       </ScrollSection>
 
-      {/* Zero Bill Guarantee */}
+      {/* Testimonials */}
       <ScrollSection>
-        <div className="guarantee-card">
-          <div className="guarantee-icon">&#128737;</div>
-          <div className="guarantee-title">The <span className="green">Zero Bill</span> Guarantee</div>
-          <div className="guarantee-desc">
-            $0 electricity bills for 10 years. Systems designed with 50% extra capacity. If you receive a bill, we pay it &mdash; no exceptions.
-          </div>
-          <div className="guarantee-tag">&#10003; Australia&rsquo;s First &amp; Only</div>
+        <div className="section-label">Testimonials</div>
+        <div className="testimonial-video">
+          <video controls preload="metadata" poster="">
+            <source src="./adam-reynolds.mp4" type="video/mp4" />
+          </video>
+          <div className="testimonial-name">Adam Reynolds</div>
+          <div className="testimonial-detail">40kW System Replacement</div>
         </div>
       </ScrollSection>
     </div>

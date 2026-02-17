@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 148 28" width="148" height="28">
+  <style>
+    .sig { font-family: 'Exo 2', 'Rajdhani', 'Inter', sans-serif; font-weight: 700; font-size: 20px; fill: white; letter-spacing: 2.5px; }
+  </style>
+  <text class="sig" x="0" y="23">SIGENERGY</text>
+  <!-- One red square above G (4th letter, approx center x≈42) -->
+  <rect x="40" y="2" width="3.5" height="3.5" rx="0.5" fill="#E60012"/>
+  <!-- One red square above Y (9th letter, approx center x≈119) -->
+  <rect x="117" y="2" width="3.5" height="3.5" rx="0.5" fill="#E60012"/>
+</svg>

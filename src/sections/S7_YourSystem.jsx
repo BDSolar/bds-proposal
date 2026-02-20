@@ -13,6 +13,7 @@ function buildCfgFromEngine(er) {
       panelTechnology: p.technology, panelWp: p.wattage, panelCount: p.panelCount,
       panelEfficiency: p.efficiency, panelCellType: p.cellType,
       panelWarrantyProduct: parseInt(p.warranty), panelWarrantyPerformance: parseInt(p.warranty.split('+')[1]),
+      panelDegradation: p.degradation ?? 0.35,
       arrayKw: p.totalKw, dailyProduction: er.system.dailyProduction,
     },
     battery: {
@@ -20,7 +21,7 @@ function buildCfgFromEngine(er) {
       usableCapacityKwh: b.usableCapacity, modules: b.modules,
       capacityPerModule: b.capacityPerModule, inverterSize: b.inverterSize,
       evChargerKw: b.evChargerKw, chemistry: b.chemistry, cycles: b.cycles,
-      ip: b.ip, features: b.features, evCharger: b.evCharger,
+      ip: b.ip, features: b.features, evCharger: b.evCharger, warranty: b.warranty ?? '10yr',
     },
     financial: { coverageRatio: er.system.coverageRatio },
   }
@@ -37,6 +38,20 @@ export default function S7_YourSystem() {
       {/* Product Cards */}
       <ScrollSection>
         <div className="section-label">Your Components</div>
+        <div className="s7-components-stack">
+        <div className="s7-overview-card">
+          <div className="s7-overview-row">
+            <div className="s7-overview-item">
+              <span className="s7-overview-value">{cfg.system.arrayKw}<span className="s7-overview-unit"> kW</span></span>
+              <span className="s7-overview-label">Solar</span>
+            </div>
+            <span className="s7-overview-plus">+</span>
+            <div className="s7-overview-item">
+              <span className="s7-overview-value">{cfg.battery.usableCapacityKwh}<span className="s7-overview-unit"> kWh</span></span>
+              <span className="s7-overview-label">Battery</span>
+            </div>
+          </div>
+        </div>
         <div className="s7-product-grid">
           {/* Panel Card */}
           <div className="s7-product-card solar-top">
@@ -312,60 +327,17 @@ export default function S7_YourSystem() {
             </div>
           </div>
         </div>
-      </ScrollSection>
-
-      {/* System Stats */}
-      <ScrollSection>
-        <div className="section-label">System Overview</div>
-        <div className="s7-system-stats">
-          <div className="s7-sys-stat"><div className="stat-value accent">{cfg.system.arrayKw} kW</div><div className="stat-label">Solar Capacity</div></div>
-          <div className="s7-sys-stat"><div className="stat-value green">{cfg.battery.totalCapacityKwh} kWh</div><div className="stat-label">Battery Storage</div></div>
-          <div className="s7-sys-stat"><div className="stat-value solar-color">{Math.round(cfg.system.dailyProduction)} kWh</div><div className="stat-label">Daily Production</div></div>
-          <div className="s7-sys-stat"><div className="stat-value yellow">{cfg.financial.coverageRatio}%</div><div className="stat-label">Usage Coverage</div></div>
+        <div className="s7-warranty-banner">
+          <div className="s7-warranty-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+          </div>
+          <div className="s7-warranty-content">
+            <h3 className="s7-warranty-title">30-Year Warranty Coverage</h3>
+            <p className="s7-warranty-sub">Performance &middot; Workmanship &middot; Monitoring &mdash; all covered</p>
+          </div>
         </div>
-      </ScrollSection>
-
-      {/* Energy Flow */}
-      <ScrollSection>
-        <div className="section-label">Energy Flow</div>
-        <div className="s7-flow-section">
-          <div className="s7-flow-title">Daytime</div>
-          <div className="s7-flow-row">
-            {[
-              { icon: '\u2600\ufe0f', label: 'Panels', detail: `${Math.round(cfg.system.dailyProduction)} kWh/day`, cls: 'solar' },
-              { icon: '\u26a1', label: 'Controller', detail: 'Manages flow', cls: 'accent' },
-              { icon: '\ud83d\udd0b', label: 'Battery', detail: 'Charging', cls: 'battery' },
-              { icon: '\ud83c\udfe0', label: 'Home', detail: 'Self-powered', cls: '' },
-              { icon: '\u2197\ufe0f', label: 'Grid', detail: 'Exporting surplus', cls: '' },
-            ].map((node, i) => (
-              <div key={i} className="s7-flow-node-wrap">
-                {i > 0 && <div className={`s7-flow-connector ${node.cls}`} />}
-                <div className={`s7-flow-node ${node.cls}`}>
-                  <div className="s7-flow-icon">{node.icon}</div>
-                  <div className="s7-flow-label">{node.label}</div>
-                  <div className="s7-flow-detail">{node.detail}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="s7-flow-title" style={{ marginTop: 32 }}>Nighttime</div>
-          <div className="s7-flow-row">
-            {[
-              { icon: '\ud83d\udd0b', label: 'Battery', detail: 'Discharging', cls: 'battery' },
-              { icon: '\u26a1', label: 'Controller', detail: 'Manages flow', cls: 'accent' },
-              { icon: '\ud83c\udfe0', label: 'Home', detail: 'Powered by battery', cls: '' },
-              { icon: '\ud83d\ude97', label: 'EV', detail: `${cfg.battery.evChargerKw} kW DC`, cls: 'battery' },
-            ].map((node, i) => (
-              <div key={i} className="s7-flow-node-wrap">
-                {i > 0 && <div className={`s7-flow-connector ${node.cls}`} />}
-                <div className={`s7-flow-node ${node.cls}`}>
-                  <div className="s7-flow-icon">{node.icon}</div>
-                  <div className="s7-flow-label">{node.label}</div>
-                  <div className="s7-flow-detail">{node.detail}</div>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </ScrollSection>
 

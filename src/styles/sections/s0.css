@@ -351,6 +351,11 @@
   object-fit: contain;
   margin-bottom: 12px;
 }
+.accred-logo-inline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .accred-icon {
   font-size: 32px;
   margin-bottom: 12px;

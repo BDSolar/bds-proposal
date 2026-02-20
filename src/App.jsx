@@ -14,8 +14,8 @@ import S8_Assumptions from './sections/S8_Assumptions'
 
 const SECTIONS = [
   S0b_DataCapture,   // 0
-  S0_AboutUs,        // 1
-  S0b_ProposalIntro, // 2
+  S0b_ProposalIntro, // 1 — customer sees their proposal first
+  S0_AboutUs,        // 2 — then company credentials
   S1_TheProblem,     // 3
   S2_EnergyLife,     // 4
   S3_AddingSolar,    // 5
@@ -35,12 +35,13 @@ export default function App() {
 
   return (
     <>
-      <div className="ambient-glow" />
-      <div className="ambient-glow-2" />
+      <a href="#main-content" className="skip-link">Skip to content</a>
+      <div className="ambient-glow" aria-hidden="true" />
+      <div className="ambient-glow-2" aria-hidden="true" />
       <StepNav />
-      <div className={`app-content${showNav ? ' nav-visible' : ''}`}>
+      <main id="main-content" className={`app-content${showNav ? ' nav-visible' : ''}`}>
         <CurrentSection />
-      </div>
+      </main>
     </>
   )
 }

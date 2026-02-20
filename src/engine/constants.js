@@ -71,8 +71,25 @@ export const COMMISSION_RATE = 0.0875 // 8.75%
 export const GST = 1.1
 
 export const STC_PRICE = 37
-export const STC_ZONE_RATING = 1.382 // QLD zone 3
 export const STC_DEEMING = 5
+
+// STC zone ratings by postcode prefix (Clean Energy Regulator zones)
+export const STC_ZONE_RATINGS = {
+  // Zone 1 (tropical) — 1.622
+  '08': 1.622, // Darwin NT
+  // Zone 2 (subtropical) — 1.536
+  '45': 1.536, '46': 1.536, '47': 1.536, '48': 1.536, '49': 1.536, // North QLD
+  // Zone 3 (temperate) — 1.382
+  '20': 1.382, '21': 1.382, '22': 1.382, '23': 1.382, '24': 1.382,
+  '25': 1.382, '26': 1.382, '28': 1.382, '29': 1.382, // NSW/ACT
+  '40': 1.382, '41': 1.382, '42': 1.382, '43': 1.382, '44': 1.382, // SE QLD
+  '50': 1.382, '51': 1.382, '52': 1.382, // SA
+  '60': 1.382, '61': 1.382, '62': 1.382, // WA
+  // Zone 4 (cool) — 1.185
+  '30': 1.185, '31': 1.185, '32': 1.185, '33': 1.185, '34': 1.185, '35': 1.185, '36': 1.185, // VIC
+  '70': 1.185, '71': 1.185, // TAS
+}
+export const STC_ZONE_DEFAULT = 1.382 // fallback
 
 export const BATTERY_REBATE_PER_KWH = 311
 export const BATTERY_REBATE_MAX_KWH = 50
@@ -81,9 +98,39 @@ export const COVERAGE_TIERS = [1.0, 1.25, 1.5, 1.75]
 
 export const FINANCIAL_DEFAULTS = {
   escalation: 0.05, // 5% p.a.
-  fit: 0.05, // $/kWh feed-in tariff
   projectionYears: 20,
   startYear: 2026,
+}
+
+// State-based FiT defaults ($/kWh)
+export const FIT_DEFAULTS = {
+  QLD: 0.07, NSW: 0.05, VIC: 0.05, SA: 0.05,
+  WA: 0.025, TAS: 0.089, NT: 0.085, ACT: 0.06,
+}
+
+// Roof orientation production multipliers
+export const ORIENTATION_FACTORS = {
+  'North': 1.0,
+  'North-East': 0.95,
+  'North-West': 0.95,
+  'East': 0.85,
+  'West': 0.85,
+  'South-East': 0.80,
+  'South-West': 0.80,
+  'Mixed': 0.90,
+}
+
+// Seasonal PSH multipliers by state (summer Dec-Feb, winter Jun-Aug)
+// Higher latitudes have bigger variation; tropical zones are flatter
+export const SEASONAL_MULTIPLIERS = {
+  QLD: { summer: 1.20, winter: 0.82 },
+  NSW: { summer: 1.28, winter: 0.74 },
+  ACT: { summer: 1.30, winter: 0.72 },
+  VIC: { summer: 1.35, winter: 0.65 },
+  SA:  { summer: 1.30, winter: 0.72 },
+  WA:  { summer: 1.25, winter: 0.78 },
+  TAS: { summer: 1.38, winter: 0.62 },
+  NT:  { summer: 1.10, winter: 0.92 },
 }
 
 // Normalised solar curve (reference: Sydney PSH 4.2)

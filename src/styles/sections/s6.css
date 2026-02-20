@@ -128,6 +128,31 @@
 .s6-savings-context .red { color: var(--red); font-weight: 600; }
 .s6-savings-context .green { color: var(--green); font-weight: 600; }
 
+/* Property value stat */
+.s6-property-value {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 24px;
+  padding: 16px 20px;
+  background: var(--green-bg);
+  border: 1px solid rgba(48, 209, 88, 0.12);
+  border-radius: var(--radius-md);
+  max-width: 540px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: left;
+}
+.s6-property-value svg { flex-shrink: 0; margin-top: 2px; }
+.s6-property-value span {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 300;
+  line-height: 1.6;
+}
+.s6-property-value strong { color: var(--green); font-weight: 600; }
+.s6-property-value em { font-size: 0.75rem; color: var(--text-quaternary); }
+
 @media (max-width: 700px) {
   .s6-chart-container { padding: 24px 16px 16px; }
   .s6-stats-row { grid-template-columns: 1fr 1fr; }

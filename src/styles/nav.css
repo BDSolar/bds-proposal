@@ -179,6 +179,21 @@
   color: var(--accent);
 }
 
+/* Menu divider + New Proposal */
+.pill-menu-divider {
+  height: 1px;
+  background: var(--separator);
+  margin: 6px 0;
+}
+.pill-menu-new {
+  color: var(--text-tertiary) !important;
+}
+.pill-menu-new:hover {
+  color: var(--red) !important;
+  background: rgba(255, 69, 58, 0.08) !important;
+}
+.pill-menu-new svg { flex-shrink: 0; }
+
 /* Backdrop behind menu */
 .pill-backdrop {
   position: fixed;

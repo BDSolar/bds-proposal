@@ -4,6 +4,7 @@ import Hero from '../components/Hero'
 import ScrollSection from '../components/ScrollSection'
 import useAnimateOnScroll from '../hooks/useAnimateOnScroll'
 import systemConfig from '../data/systemConfig'
+import TestimonialQuote from '../components/TestimonialQuote'
 import '../styles/sections/s1.css'
 
 const ESCALATION = systemConfig.tariff.escalation
@@ -49,8 +50,8 @@ function AnimatedCounter({ target, prefix = '$', duration = 1500 }) {
   }, [isVisible, target, prefix, duration])
 
   return (
-    <div ref={counterRef}>
-      <span ref={ref}>{prefix}0</span>
+    <div ref={counterRef} aria-live="polite" aria-atomic="true">
+      <span ref={ref} role="status">{prefix}0</span>
     </div>
   )
 }
@@ -114,7 +115,7 @@ function CostChart({ yearlyData }) {
     return (
       <g key={i}>
         <circle cx={cx} cy={cy} r="20" fill="transparent" className="hover-zone"
-          onMouseEnter={(e) => {
+          onPointerEnter={(e) => {
             const tooltip = tooltipRef.current
             if (!tooltip) return
             tooltip.querySelector('.tooltip-year').textContent = d.year
@@ -128,7 +129,21 @@ function CostChart({ yearlyData }) {
               tooltip.style.top = (cy * scale - 60) + 'px'
             }
           }}
-          onMouseLeave={() => tooltipRef.current?.classList.remove('active')}
+          onPointerLeave={() => tooltipRef.current?.classList.remove('active')}
+          onTouchStart={(e) => {
+            e.preventDefault()
+            const tooltip = tooltipRef.current
+            if (!tooltip) return
+            tooltip.querySelector('.tooltip-year').textContent = d.year
+            tooltip.querySelector('.tooltip-amount').textContent = `$${d.cumulative.toLocaleString()}`
+            tooltip.classList.toggle('active')
+            const svgRect = e.currentTarget.closest('svg')?.getBoundingClientRect()
+            if (svgRect) {
+              const scale = svgRect.width / W
+              tooltip.style.left = (cx * scale - 60) + 'px'
+              tooltip.style.top = (cy * scale - 60) + 'px'
+            }
+          }}
         />
         <circle cx={cx} cy={cy} r={isMilestone ? 5 : 3} className={`chart-dot${isVisible ? ' visible' : ''}`}
           style={{ transitionDelay: `${1 + i * 0.04}s` }}
@@ -164,7 +179,7 @@ function CostChart({ yearlyData }) {
   return (
     <div ref={chartRef}>
       <div className="chart-wrap">
-        <svg className="chart-svg-full" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet">
+        <svg className="chart-svg-full" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" role="img" aria-label="Cumulative electricity cost projection over 20 years">
           <defs>
             <linearGradient id="curveFill" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#ff453a" stopOpacity="0.4" />
@@ -218,7 +233,7 @@ export default function S1_TheProblem() {
     <div>
       <Hero
         badge="Section 01 — The Problem"
-        title="Your electricity bill"
+        title={customer.firstName ? `${customer.firstName}, your electricity bill` : 'Your electricity bill'}
         highlightText="is quietly exploding"
         subtitle="Every year, energy costs climb higher. Here's what that really looks like over the next 20 years."
       />
@@ -302,6 +317,15 @@ export default function S1_TheProblem() {
           </div>
           <div className="cumulative-sub">Total electricity spend &middot; {START_YEAR}&ndash;{START_YEAR + YEARS - 1}</div>
         </div>
+      </ScrollSection>
+
+      <ScrollSection>
+        <TestimonialQuote
+          quote="I was paying $780 a quarter and it just kept going up. Now I get a $43 credit. I wish I'd done it years ago."
+          name="Sarah M."
+          location="Bundaberg"
+          system="13.3 kW system"
+        />
       </ScrollSection>
 
       {/* CTA */}

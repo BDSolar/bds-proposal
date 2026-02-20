@@ -122,7 +122,7 @@ export default function S2_EnergyLife() {
         <div ref={chartRef}>
           <div className="s2-chart-container">
             <div className="chart-area s2-chart-area">
-              <svg className="chart-svg" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet">
+              <svg className="chart-svg" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" role="img" aria-label="24-hour household energy load curve showing usage by appliance type">
                 {/* Grid lines */}
                 {gridLines.map((gl, i) => (
                   <g key={i}>
@@ -200,8 +200,9 @@ export default function S2_EnergyLife() {
                       height={chartH}
                       fill="transparent"
                       style={{ cursor: 'crosshair' }}
-                      onMouseEnter={() => handleMouseEnter(h)}
-                      onMouseLeave={handleMouseLeave}
+                      onPointerEnter={() => handleMouseEnter(h)}
+                      onPointerLeave={handleMouseLeave}
+                      onTouchStart={(e) => { e.preventDefault(); handleMouseEnter(h) }}
                     />
                   )
                 })}
@@ -273,8 +274,8 @@ export default function S2_EnergyLife() {
       {/* CTA */}
       <ScrollSection>
         <div className="cta-section">
-          <h2>What if you could<br />capture the <span className="highlight">sun&rsquo;s energy</span>?</h2>
-          <p>Let&rsquo;s overlay solar production onto your usage pattern and see what changes.</p>
+          <h2>Your roof is already bathed in<br /><span className="highlight">free electricity.</span></h2>
+          <p>Let&rsquo;s overlay solar production onto your usage pattern and see what happens.</p>
         </div>
       </ScrollSection>
     </div>

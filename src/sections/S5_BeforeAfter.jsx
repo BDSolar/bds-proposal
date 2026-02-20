@@ -160,7 +160,7 @@ export default function S5_BeforeAfter() {
 
   return (
     <div>
-      <Hero badge="Section 05 — Before & After" title="See the" highlightText="difference" subtitle="Three scenarios. Same house. Completely different outcomes." />
+      <Hero badge="Section 05 — Before & After" title="Same home." highlightText="Three outcomes." subtitle="Three scenarios. Same house. Completely different outcomes." />
 
       <ScrollSection>
         <div className="section-label">Scenario Comparison</div>
@@ -175,7 +175,7 @@ export default function S5_BeforeAfter() {
             </div>
           </div>
           <div className="chart-area s5-chart-area">
-            <svg className="chart-svg" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet">
+            <svg className="chart-svg" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" role="img" aria-label="Before and after energy comparison showing grid dependency reduction">
               <defs>
                 <linearGradient id="s5gradGrid" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#ff453a" stopOpacity="0.2" /><stop offset="100%" stopColor="#ff453a" stopOpacity="0.02" /></linearGradient>
                 <linearGradient id="s5gradSC" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#30d158" stopOpacity="0.25" /><stop offset="100%" stopColor="#30d158" stopOpacity="0.03" /></linearGradient>
@@ -281,6 +281,54 @@ export default function S5_BeforeAfter() {
             </div>
           </div>
         </div>
+        </div>
+      </ScrollSection>
+
+      <ScrollSection>
+        <div className="s5-future-pacing">
+          <p className="s5-future-pacing-text">
+            Picture this: it&rsquo;s three months from now. You open your quarterly electricity bill. It says <span className="green">$0</span>. Actually, your retailer owes <em>you</em> a credit.
+          </p>
+          <p className="s5-future-pacing-text">
+            That&rsquo;s not a dream &mdash; that&rsquo;s what this system is designed to do.
+          </p>
+        </div>
+      </ScrollSection>
+
+      {/* Environmental Impact */}
+      <ScrollSection>
+        <div className="section-label">Environmental Impact</div>
+        <div className="s5-env-impact">
+          {(() => {
+            const annualProd = (er ? er.system.dailyProduction : totalLoad.reduce((a,b) => a+b, 0)) * 365
+            const co2PerKwh = 0.79 // kg CO2 per kWh (Australian grid average)
+            const co2Saved = Math.round(annualProd * co2PerKwh / 1000 * 20) // tonnes over 20 years
+            const treesEquiv = Math.round(co2Saved * 1000 / 21) // ~21 kg CO2 absorbed per tree per year
+            const carsRemoved = (co2Saved / 4.6).toFixed(1) // ~4.6 tonnes CO2 per car per year
+            return (
+              <>
+                <div className="s5-env-heading">Over 20 years, your system offsets</div>
+                <div className="s5-env-grid">
+                  <div className="s5-env-card">
+                    <div className="s5-env-icon">{'\ud83c\udf0d'}</div>
+                    <div className="s5-env-value green">{co2Saved}t</div>
+                    <div className="s5-env-label">CO{'\u2082'} avoided</div>
+                  </div>
+                  <div className="s5-env-card">
+                    <div className="s5-env-icon">{'\ud83c\udf33'}</div>
+                    <div className="s5-env-value green">{treesEquiv.toLocaleString()}</div>
+                    <div className="s5-env-label">Trees planted equivalent</div>
+                  </div>
+                  <div className="s5-env-card">
+                    <div className="s5-env-icon">{'\ud83d\ude97'}</div>
+                    <div className="s5-env-value green">{carsRemoved}</div>
+                    <div className="s5-env-label">Cars off the road (20 yrs)</div>
+                  </div>
+                </div>
+                <div className="s5-env-note">Based on Australian grid emission factor of {co2PerKwh} kg CO{'\u2082'}/kWh (Clean Energy Regulator 2024)</div>
+              </>
+            )
+          })()}
         </div>
       </ScrollSection>
 

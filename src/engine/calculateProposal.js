@@ -11,11 +11,25 @@ import {
   PANEL_PRICE, BATTERY_MODULE_PRICE, BATTERY_USABLE_PER_MODULE,
   INVERTERS, PV_INSTALL_PER_KW, BATTERY_INSTALL_PER_STACK,
   GP_MARGIN, COMMISSION_RATE, GST,
-  STC_PRICE, STC_ZONE_RATING, STC_DEEMING,
+  STC_PRICE, STC_ZONE_RATINGS, STC_ZONE_DEFAULT, STC_DEEMING,
   BATTERY_REBATE_PER_KWH, BATTERY_REBATE_MAX_KWH,
+  FIT_DEFAULTS, ORIENTATION_FACTORS,
 } from './constants'
 import { generateLoadProfiles } from './loadProfiles'
-import { lookupSolarZone, generateSolarCurve, getDailyProductionKwh } from './solarProduction'
+import { lookupSolarZone, generateSolarCurve, getDailyProductionKwh, generateSolarCurveOriented, getSeasonalProduction } from './solarProduction'
+
+// ── Resolve customer FiT rate ──
+function resolveFit(customer) {
+  const parsed = parseFloat(customer.fitRate)
+  if (parsed > 0) return parsed
+  return FIT_DEFAULTS[customer.state] || FIT_DEFAULTS.QLD
+}
+
+// ── Look up STC zone rating from postcode ──
+function lookupStcZoneRating(postcode) {
+  const prefix = String(postcode).substring(0, 2)
+  return STC_ZONE_RATINGS[prefix] || STC_ZONE_DEFAULT
+}
 
 // ── Auto-select cheapest inverter that fits the PV array ──
 function autoSelectInverter(pvKw, phase) {
@@ -34,7 +48,7 @@ function autoSelectInverter(pvKw, phase) {
 }
 
 // ── BDS pricing waterfall ──
-function calculateSystemPrice(panelCount, pvKw, batteryModules, phase) {
+function calculateSystemPrice(panelCount, pvKw, batteryModules, phase, stcZoneRating) {
   const panelsCost = panelCount * PANEL_PRICE
   const inverter = autoSelectInverter(pvKw, phase)
   const inverterCost = inverter.unitPrice
@@ -47,7 +61,7 @@ function calculateSystemPrice(panelCount, pvKw, batteryModules, phase) {
   const gpMargin = totalCog * GP_MARGIN
   const baseIncGst = (totalCog + gpMargin) * GST
 
-  const stcRebate = Math.floor(pvKw * STC_ZONE_RATING * STC_DEEMING) * STC_PRICE
+  const stcRebate = Math.floor(pvKw * stcZoneRating * STC_DEEMING) * STC_PRICE
   const usableKwh = batteryModules * BATTERY_USABLE_PER_MODULE
   const batteryRebate = Math.min(usableKwh, BATTERY_REBATE_MAX_KWH) * BATTERY_REBATE_PER_KWH
 
@@ -87,7 +101,8 @@ function sizeSolar(customer, loadProfiles, coverageRatio) {
   const dailyUsage = loadProfiles.dailyTotal
   const zone = lookupSolarZone(customer.postcode, customer.state)
   const psh = zone.psh
-  const effectivePSH = psh * (1 - SYSTEM_LOSSES)
+  const orientationFactor = ORIENTATION_FACTORS[customer.roofOrientation] || 1.0
+  const effectivePSH = psh * (1 - SYSTEM_LOSSES) * orientationFactor
 
   const targetProduction = dailyUsage * coverageRatio
   const requiredKw = targetProduction / effectivePSH
@@ -102,7 +117,8 @@ function sizeSolar(customer, loadProfiles, coverageRatio) {
     actualKw,
     zone,
     psh,
-    dailyProduction: getDailyProductionKwh(actualKw, psh),
+    orientationFactor,
+    dailyProduction: getDailyProductionKwh(actualKw, psh, orientationFactor),
   }
 }
 
@@ -208,11 +224,11 @@ function simulateBattery(totalLoad, solarCurve, batterySize) {
 }
 
 // ── Financial projections ──
-function calculateFinancials(customer, systemCost, batteryResults, tariffRate, supplyCharge) {
+function calculateFinancials(customer, systemCost, batteryResults, tariffRate, supplyCharge, fit) {
   const dailyUsage = parseFloat(customer.dailyUsage) || 30
   tariffRate = tariffRate || parseFloat(customer.tariffRate) || 0.32
   supplyCharge = supplyCharge || parseFloat(customer.supplyCharge) || 1.10
-  const fit = FINANCIAL_DEFAULTS.fit
+  fit = fit || resolveFit(customer)
   const escalation = FINANCIAL_DEFAULTS.escalation
   const years = FINANCIAL_DEFAULTS.projectionYears
   const startYear = FINANCIAL_DEFAULTS.startYear
@@ -273,14 +289,15 @@ function calculateFinancials(customer, systemCost, batteryResults, tariffRate, s
 function generateSystemOption(customer, loadProfiles, batterySize, coverageRatio) {
   const tariffRate = parseFloat(customer.tariffRate) || 0.32
   const supplyCharge = parseFloat(customer.supplyCharge) || 1.10
-  const fit = FINANCIAL_DEFAULTS.fit
+  const fit = resolveFit(customer)
   const phase = customer.phase || 'Single'
+  const stcZoneRating = lookupStcZoneRating(customer.postcode)
 
   // 1. Size solar (battery is pre-sized — it's the anchor)
   const solar = sizeSolar(customer, loadProfiles, coverageRatio)
 
-  // 2. Generate solar curve
-  const solarCurve = generateSolarCurve(solar.actualKw, solar.psh)
+  // 2. Generate solar curve with orientation
+  const solarCurve = generateSolarCurveOriented(solar.actualKw, solar.psh, solar.orientationFactor)
 
   // 3. Solar-only sim
   const solarOnly = simulateSolarOnly(loadProfiles.totalLoad, solarCurve, tariffRate, supplyCharge, fit)
@@ -297,13 +314,13 @@ function generateSystemOption(customer, loadProfiles, batterySize, coverageRatio
   const annualCredit = Math.round(dailyCredit * 365)
   const fitRevenue = Math.round(dailyExportRevenue * 365)
 
-  // 6. System price via BDS waterfall
+  // 6. System price via BDS waterfall (dynamic STC zone)
   const pricing = calculateSystemPrice(
-    solar.panelCount, solar.actualKw, batterySize.modules, phase
+    solar.panelCount, solar.actualKw, batterySize.modules, phase, stcZoneRating
   )
 
   // 7. Financial projection
-  const financial = calculateFinancials(customer, pricing.customerPrice, batteryResults, tariffRate, supplyCharge)
+  const financial = calculateFinancials(customer, pricing.customerPrice, batteryResults, tariffRate, supplyCharge, fit)
 
   // Combined systemSize object for downstream consumers
   const systemSize = {
@@ -317,6 +334,7 @@ function generateSystemOption(customer, loadProfiles, batterySize, coverageRatio
     zone: solar.zone,
     psh: solar.psh,
     dailyProduction: solar.dailyProduction,
+    seasonal: getSeasonalProduction(solar.actualKw, solar.psh, solar.orientationFactor, customer.state),
   }
 
   return {
@@ -357,7 +375,7 @@ function buildScenarios(customer, solarOnly, batteryResults) {
   const dailyUsage = parseFloat(customer.dailyUsage) || 30
   const tariffRate = parseFloat(customer.tariffRate) || 0.32
   const supplyCharge = parseFloat(customer.supplyCharge) || 1.10
-  const fit = FINANCIAL_DEFAULTS.fit
+  const fit = resolveFit(customer)
 
   const noSolarDaily = (dailyUsage * tariffRate) + supplyCharge
   const battDailyNet =
@@ -419,6 +437,7 @@ function buildSystemSpec(systemSize, customer) {
     },
     coverageRatio: Math.round((systemSize.dailyProduction / (parseFloat(customer.dailyUsage) || 30)) * 100),
     dailyProduction: Math.round(systemSize.dailyProduction * 100) / 100,
+    seasonal: systemSize.seasonal,
   }
 }
 
@@ -427,13 +446,14 @@ function buildAssumptions(customer, systemSize, solarCurve) {
   const tariffRate = parseFloat(customer.tariffRate) || 0.32
   const supplyCharge = parseFloat(customer.supplyCharge) || 1.10
   const dailyUsage = parseFloat(customer.dailyUsage) || 30
+  const fit = resolveFit(customer)
   const prefix = String(customer.postcode).substring(0, 2)
 
   return {
     tariff: {
       rate: tariffRate,
       supply: supplyCharge,
-      fit: FINANCIAL_DEFAULTS.fit,
+      fit,
       escalation: FINANCIAL_DEFAULTS.escalation,
       tariffType: 'Single Rate (Flat)',
       network: NETWORK_LOOKUP[prefix] || 'Unknown',
@@ -447,11 +467,13 @@ function buildAssumptions(customer, systemSize, solarCurve) {
       totalKw: Math.round(systemSize.actualKw * 100) / 100,
       efficiency: PANEL.efficiency,
       technology: PANEL.technology,
-      orientation: 'North',
+      orientation: customer.roofOrientation || 'North',
       tilt: 20,
       peakSunHours: systemSize.psh,
       dailyProduction: Math.round(systemSize.dailyProduction * 100) / 100,
       annualProduction: Math.round(systemSize.dailyProduction * 365),
+      summerDailyProduction: systemSize.seasonal?.summer,
+      winterDailyProduction: systemSize.seasonal?.winter,
       systemLosses: SYSTEM_LOSSES * 100,
       location: `${customer.suburb || ''}, ${customer.state || 'QLD'}`.replace(/^, /, ''),
     },

@@ -72,6 +72,49 @@
 .stat-value.yellow { color: var(--yellow); }
 .stat-value.red { color: var(--red); }
 
+/* Seasonal range */
+.s3-seasonal-range {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-top: 20px;
+  padding: 16px 24px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-md);
+}
+.s3-seasonal-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px;
+}
+.s3-seasonal-icon { font-size: 1.1rem; }
+.s3-seasonal-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.s3-seasonal-val {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.s3-seasonal-item.summer .s3-seasonal-val { color: #f5a623; }
+.s3-seasonal-item.avg .s3-seasonal-val { color: var(--text-secondary); }
+.s3-seasonal-item.winter .s3-seasonal-val { color: #5ea8ff; }
+.s3-seasonal-divider {
+  width: 1px;
+  height: 28px;
+  background: var(--separator);
+}
+@media (max-width: 600px) {
+  .s3-seasonal-range { flex-direction: column; gap: 12px; }
+  .s3-seasonal-divider { width: 40px; height: 1px; }
+}
+
 /* Insight callout */
 .s3-insight {
   text-align: center;

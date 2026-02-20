@@ -101,7 +101,7 @@ export default function S3_AddingSolar() {
         </div>
       </div>
       <div className="chart-area s3-chart-area">
-        <svg className="chart-svg" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet">
+        <svg className="chart-svg" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" role="img" aria-label="Solar production overlaid on daily energy usage curve">
           <defs>
             <linearGradient id="gradSelfConsume" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#30d158" stopOpacity="0.3" />
@@ -176,7 +176,7 @@ export default function S3_AddingSolar() {
 
   return (
     <div>
-      <Hero badge="Section 03 — Adding Solar" title="Here comes" highlightText="the sun" subtitle={`A ${cfg.system.arrayKw} kW solar system produces a wave of free energy every day. Let\u2019s walk through what that looks like \u2014 morning, noon, and night.`} />
+      <Hero badge="Section 03 — Adding Solar" title={state.customer.firstName ? `Here comes the sun,` : 'Here comes'} highlightText={state.customer.firstName || 'the sun'} subtitle={`A ${cfg.system.arrayKw} kW solar system produces a wave of free energy every day. Let\u2019s walk through what that looks like \u2014 morning, noon, and night.`} />
 
       <StickyBeatChart chart={chartNode} beats={beats} activeBeat={activeBeat} onBeatChange={setActiveBeat} />
 
@@ -188,6 +188,27 @@ export default function S3_AddingSolar() {
           <div className="s3-stat-card"><div className="stat-value yellow">{metrics.totalExport.toFixed(1)} kWh</div><div className="stat-label">Exported</div></div>
           <div className="s3-stat-card"><div className="stat-value red">{metrics.totalImport.toFixed(1)} kWh</div><div className="stat-label">Still Importing</div></div>
         </div>
+        {er?.system?.seasonal && (
+          <div className="s3-seasonal-range">
+            <div className="s3-seasonal-item summer">
+              <span className="s3-seasonal-icon">{'\u2600\ufe0f'}</span>
+              <span className="s3-seasonal-label">Summer</span>
+              <span className="s3-seasonal-val">{er.system.seasonal.summer} kWh/day</span>
+            </div>
+            <div className="s3-seasonal-divider" />
+            <div className="s3-seasonal-item avg">
+              <span className="s3-seasonal-icon">{'\ud83d\udcc5'}</span>
+              <span className="s3-seasonal-label">Average</span>
+              <span className="s3-seasonal-val">{er.system.seasonal.annual} kWh/day</span>
+            </div>
+            <div className="s3-seasonal-divider" />
+            <div className="s3-seasonal-item winter">
+              <span className="s3-seasonal-icon">{'\u2744\ufe0f'}</span>
+              <span className="s3-seasonal-label">Winter</span>
+              <span className="s3-seasonal-val">{er.system.seasonal.winter} kWh/day</span>
+            </div>
+          </div>
+        )}
         <div className="s3-insight" style={{ marginTop: 32 }}>
           <div className="insight-icon">&#9888;&#65039;</div>
           <div className="insight-big">{metrics.scPct}% self-use</div>
@@ -197,8 +218,8 @@ export default function S3_AddingSolar() {
 
       <ScrollSection>
         <div className="cta-section">
-          <h2>What if you could<br /><span className="highlight">store that energy?</span></h2>
-          <p>A battery captures the midday surplus and shifts it to the evening. Let&rsquo;s see the difference.</p>
+          <h2>You&rsquo;re producing more than you need.<br /><span className="highlight">The question is where it goes.</span></h2>
+          <p>Right now, it goes to the grid for ${cfg.tariff.fit.toFixed(2)}/kWh. A battery keeps it for tonight. Let&rsquo;s see what changes.</p>
         </div>
       </ScrollSection>
     </div>

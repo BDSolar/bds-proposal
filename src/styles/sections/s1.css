@@ -117,7 +117,7 @@
 .curve-line.visible { stroke-dashoffset: 0; }
 .chart-dot { fill: #ff453a; opacity: 0; transition: opacity 0.3s ease; }
 .chart-dot.visible { opacity: 1; }
-.hover-zone { cursor: crosshair; }
+.hover-zone { cursor: crosshair; touch-action: none; }
 .hover-zone:hover ~ circle { r: 6; }
 
 /* Milestone vertical lines */

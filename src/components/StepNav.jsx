@@ -4,8 +4,8 @@ import '../styles/nav.css'
 
 const STEP_LABELS = [
   'Getting Started',
-  'About Us',
   'Your Proposal',
+  'About Us',
   'The Problem',
   'Your Energy Life',
   'Adding Solar',
@@ -99,7 +99,13 @@ export default function StepNav() {
             <path d="M10 3L5 8l5 5" />
           </svg>
         </button>
-        <button className="pill-label" onClick={() => setMenuOpen(!menuOpen)}>
+        <button
+          className="pill-label"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-expanded={menuOpen}
+          aria-controls="section-menu"
+          aria-label={`${label}. Open section menu`}
+        >
           {label}
         </button>
         <button
@@ -114,22 +120,29 @@ export default function StepNav() {
         </button>
 
         {/* Section picker menu */}
-        <div className={`pill-menu${menuOpen ? ' open' : ''}`}>
+        <div id="section-menu" role="menu" className={`pill-menu${menuOpen ? ' open' : ''}`}>
           {STEP_LABELS.map((name, i) => (
             <button
               key={i}
+              role="menuitem"
               className={`pill-menu-item${i === currentStep ? ' active' : ''}`}
+              aria-current={i === currentStep ? 'step' : undefined}
               onClick={() => jumpTo(i)}
             >
               <span className="pill-menu-num">{String(i).padStart(2, '0')}</span>
               {name}
             </button>
           ))}
+          <div className="pill-menu-divider" />
+          <button className="pill-menu-item pill-menu-new" onClick={() => { dispatch({ type: 'RESET' }); setMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+            New Proposal
+          </button>
         </div>
       </nav>
 
       {/* Backdrop */}
-      {menuOpen && <div className="pill-backdrop" onClick={() => setMenuOpen(false)} />}
+      {menuOpen && <div className="pill-backdrop" aria-hidden="true" onClick={() => setMenuOpen(false)} />}
     </>
   )
 }

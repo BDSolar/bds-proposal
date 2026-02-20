@@ -67,6 +67,17 @@
   font-weight: 700;
 }
 
+/* Product Narrative */
+.s7-product-narrative {
+  font-size: 0.85rem;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--text-tertiary);
+  line-height: 1.7;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--separator);
+}
+
 /* Product Illustration */
 .s7-product-illustration {
   display: flex;
@@ -200,6 +211,31 @@
   color: var(--text-secondary);
 }
 
+/* ── Installation Quality Callout ── */
+.s7-install-quality {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--separator);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.s7-install-quality-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  font-weight: 300;
+}
+.s7-install-quality-item strong {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.s7-install-quality-item svg {
+  flex-shrink: 0;
+}
+
 /* ── Overview Card ── */
 .s7-overview-card {
   background: var(--bg-secondary);
@@ -299,6 +335,63 @@
   letter-spacing: 0.5px;
 }
 
+/* ── Warranty Breakdown Table ── */
+.s7-warranty-table {
+  margin-top: 16px;
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.s7-warranty-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.s7-warranty-table th {
+  padding: 10px 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  text-align: left;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--separator);
+}
+.s7-warranty-table td {
+  padding: 10px 16px;
+  font-size: 0.85rem;
+  font-weight: 300;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--separator);
+}
+.s7-warranty-table tr:last-child td { border-bottom: none; }
+.s7-warranty-table tr:hover td { background: rgba(255,255,255,0.02); }
+.s7-warranty-highlight td {
+  color: var(--green) !important;
+  font-weight: 500 !important;
+}
+
+/* ── STC Rebate Urgency Bar ── */
+.s7-stc-urgency {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 20px 24px;
+  background: rgba(245, 166, 35, 0.06);
+  border: 1px solid rgba(245, 166, 35, 0.2);
+  border-radius: var(--radius-md);
+}
+.s7-stc-urgency svg { flex-shrink: 0; margin-top: 2px; }
+.s7-stc-urgency-text {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 300;
+  line-height: 1.7;
+}
+.s7-stc-urgency-text strong { color: #f5a623; font-weight: 600; }
+.s7-stc-amount { color: var(--green); font-weight: 600; }
+.s7-stc-drop { color: #ff453a; font-weight: 600; }
+
 /* Guarantee Card */
 .s7-guarantee {
   background: var(--bg-secondary);
@@ -364,6 +457,38 @@
   gap: 16px;
   margin-bottom: 16px;
 }
+.s7-options-single {
+  grid-template-columns: 1fr;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.s7-options-others {
+  grid-template-columns: repeat(3, 1fr);
+}
+.s7-options-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  background: transparent;
+  border: 1px dashed var(--separator);
+  border-radius: var(--radius-md);
+  color: var(--text-tertiary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 16px;
+}
+.s7-options-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
 
 .s7-option-card {
   background: var(--bg-secondary);
@@ -426,6 +551,24 @@
 }
 .s7-option-price-note {
   font-size: 0.7rem;
+  color: var(--text-quaternary);
+  margin-bottom: 6px;
+}
+.s7-option-weekly {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--accent);
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.s7-option-weekly-context {
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
+  font-weight: 300;
+  margin-bottom: 4px;
+}
+.s7-option-finance-note {
+  font-size: 0.65rem;
   color: var(--text-quaternary);
   margin-bottom: 16px;
 }
@@ -525,6 +668,7 @@
   .s7-product-grid { grid-template-columns: 1fr; }
   .s7-specs-grid { grid-template-columns: 1fr 1fr; }
   .s7-options-grid { grid-template-columns: 1fr 1fr; }
+  .s7-options-others { grid-template-columns: 1fr 1fr; }
   .s7-overview-card { padding: 28px 20px; }
   .s7-overview-row { gap: 20px; }
   .s7-warranty-banner { padding: 24px; gap: 16px; }
@@ -533,6 +677,7 @@
 @media (max-width: 480px) {
   .s7-specs-grid { grid-template-columns: 1fr; }
   .s7-options-grid { grid-template-columns: 1fr; }
+  .s7-options-others { grid-template-columns: 1fr; }
   .s7-overview-row { flex-direction: column; gap: 12px; }
   .s7-overview-plus { font-size: 1.5rem; }
   .s7-warranty-banner { flex-direction: column; text-align: center; gap: 12px; }

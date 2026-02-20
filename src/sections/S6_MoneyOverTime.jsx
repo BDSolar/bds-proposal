@@ -142,7 +142,7 @@ export default function S6_MoneyOverTime() {
 
   return (
     <div>
-      <Hero badge="Section 06 — The Financial Picture" title="Money" highlightText="over time" subtitle="Your system pays for itself — then keeps saving you money for the next 20 years." />
+      <Hero badge="Section 06 — The Financial Picture" title={state.customer.firstName ? `${state.customer.firstName}, it` : 'The moment it'} highlightText="pays for itself" subtitle="Your system pays for itself — then keeps saving you money for the next 20 years." />
 
       <ScrollSection>
         <div ref={chartRef}>
@@ -150,7 +150,7 @@ export default function S6_MoneyOverTime() {
             <div className="s6-chart-title">Cumulative Cost Comparison</div>
             <div className="s6-chart-subtitle">20-YEAR PROJECTION</div>
             <div className="chart-area s6-chart-area">
-              <svg className="chart-svg" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet">
+              <svg className="chart-svg" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" role="img" aria-label="20-year cumulative cost comparison between solar and no-solar scenarios">
                 {/* Grid lines */}
                 {gridLines.map((gl, i) => (
                   <g key={i}>
@@ -233,6 +233,10 @@ export default function S6_MoneyOverTime() {
           </div>
           <div className="s6-savings-context">
             Instead of paying <span className="red">${data[data.length - 1].gridCumulative.toLocaleString()}</span> to the grid, you invest <span className="green">${investmentCost.toLocaleString()}</span> once and save the rest.
+          </div>
+          <div className="s6-property-value">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L2 8v9a1 1 0 001 1h14a1 1 0 001-1V8L10 2z" stroke="#30d158" strokeWidth="1.2" fill="none"/><path d="M8 18v-5h4v5" stroke="#30d158" strokeWidth="1.2"/></svg>
+            <span>Solar homes sell for an average of <strong>$29,000 more</strong> and spend <strong>20% less time</strong> on the market. <em>Source: Origin Energy, 2024</em></span>
           </div>
         </div>
       </section>

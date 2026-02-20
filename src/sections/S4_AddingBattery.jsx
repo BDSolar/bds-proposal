@@ -142,7 +142,7 @@ export default function S4_AddingBattery() {
         </div>
       </div>
       <div className="chart-area s4-chart-area">
-        <svg className="chart-svg" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet">
+        <svg className="chart-svg" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" role="img" aria-label="Battery charge and discharge cycle over 24 hours">
           <defs>
             <linearGradient id="gradBattCharge" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#30d158" stopOpacity="0.3" />

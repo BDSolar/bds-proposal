@@ -1,8 +1,11 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useRef } from 'react'
 import { useProposal } from '../context/ProposalContext'
+import { useReps } from '../hooks/useReps'
 import Hero from '../components/Hero'
 import ScrollSection from '../components/ScrollSection'
 import systemConfig from '../data/systemConfig'
+import { getShareUrl } from '../utils/proposalUrl'
+// PDF export is lazy-loaded on demand to avoid bundling jsPDF in the main chunk
 import '../styles/sections/s8.css'
 
 function buildAccordionSections(cfg, er) {
@@ -36,6 +39,7 @@ function buildAccordionSections(cfg, er) {
           ['Orientation / Tilt', `${a.solar.orientation}, ${a.solar.tilt}\u00b0`],
           ['Peak Sun Hours', `${a.solar.peakSunHours} hrs/day`],
           ['Daily Production (Yr 1)', `${a.solar.dailyProduction} kWh`],
+          ...(a.solar.summerDailyProduction ? [['Summer Production', `${a.solar.summerDailyProduction} kWh/day`], ['Winter Production', `${a.solar.winterDailyProduction} kWh/day`]] : []),
           ['Annual Production (Yr 1)', `${a.solar.annualProduction.toLocaleString()} kWh`],
           ['System Losses', `${a.solar.systemLosses}%`],
           ['Location', a.solar.location],
@@ -211,6 +215,94 @@ const STATIC_ACCORDION_SECTIONS = [
   },
 ]
 
+function EmailCapture({ firstName }) {
+  const [email, setEmail] = useState('')
+  const [sent, setSent] = useState(false)
+  const inputRef = useRef(null)
+
+  function handleSend() {
+    if (!email || !email.includes('@')) {
+      inputRef.current?.focus()
+      return
+    }
+    window.location.href = `mailto:${email}?subject=Your%20Solar%20Proposal%20from%20Black%20Diamond%20Solar&body=Hi%20${firstName || ''},%0A%0AHere%20is%20your%20personalised%20solar%20proposal%20from%20Black%20Diamond%20Solar.`
+    setSent(true)
+  }
+
+  if (sent) {
+    return <div className="s8-cta-email-sent">Proposal sent to {email}</div>
+  }
+
+  return (
+    <div className="s8-cta-email-capture">
+      <input
+        ref={inputRef}
+        type="email"
+        className="s8-cta-email-input"
+        placeholder="Enter email to send proposal"
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+        onKeyDown={e => e.key === 'Enter' && handleSend()}
+      />
+      <button className="s8-cta-email-send" onClick={handleSend}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>
+        Send
+      </button>
+    </div>
+  )
+}
+
+function ShareLink({ state }) {
+  const [copied, setCopied] = useState(false)
+
+  function handleCopy() {
+    const url = getShareUrl(state)
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2500)
+    })
+  }
+
+  return (
+    <button className="s8-share-link" onClick={handleCopy}>
+      {copied ? (
+        <>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#30d158" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+          Link copied
+        </>
+      ) : (
+        <>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" /></svg>
+          Copy proposal link
+        </>
+      )}
+    </button>
+  )
+}
+
+function DownloadPdfButton({ state }) {
+  const [generating, setGenerating] = useState(false)
+
+  async function handleDownload() {
+    setGenerating(true)
+    try {
+      const { generateProposalPdf } = await import('../utils/pdfExport')
+      await generateProposalPdf(state)
+    } catch (e) {
+      console.error('PDF generation failed:', e)
+    } finally {
+      setGenerating(false)
+    }
+  }
+
+  return (
+    <button className="s8-cta-secondary" onClick={handleDownload} disabled={generating}>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+      {generating ? 'Generating...' : 'Download Proposal PDF'}
+    </button>
+  )
+}
+
 const ChevronDown = () => (
   <svg className="s8-accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="6 9 12 15 18 9" />
@@ -220,6 +312,7 @@ const ChevronDown = () => (
 export default function S8_Assumptions() {
   const { state } = useProposal()
   const er = state.engineResults
+  const { reps } = useReps()
   const [openId, setOpenId] = useState(null)
 
   const accordionSections = useMemo(() => {
@@ -232,7 +325,7 @@ export default function S8_Assumptions() {
 
   return (
     <div>
-      <Hero badge="Section 08 \u2014 Transparency" title="No" highlightText="black boxes" subtitle="Every number in your proposal is backed by real data. Here\u2019s exactly how we calculated your system, your savings, and your $0 bill." />
+      <Hero badge="Section 08 \u2014 Transparency" title={state.customer.firstName ? `${state.customer.firstName}, no` : 'No'} highlightText="black boxes" subtitle="Every number in your proposal is backed by real data. Here\u2019s exactly how we calculated your system, your savings, and your $0 bill." />
 
       <ScrollSection>
         <div className="section-label">Assumptions</div>
@@ -280,10 +373,89 @@ export default function S8_Assumptions() {
         </div>
       </ScrollSection>
 
+      {/* Cooling-off notice */}
       <ScrollSection>
-        <div className="cta-section">
-          <h2>Ready to go<br /><span className="highlight">Bill-to-Zero?</span></h2>
-          <p>You&rsquo;ve seen the data. You&rsquo;ve seen the system. Let&rsquo;s make it happen.</p>
+        <div className="s8-cooling-off">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 8v4l2 2" /></svg>
+          <div className="s8-cooling-off-text">
+            <strong>10-Day Cooling-Off Period</strong> &mdash; Under the Australian Consumer Law, you have 10 business days to cancel any agreement signed at your home, with a full refund. No questions asked.
+          </div>
+        </div>
+      </ScrollSection>
+
+      {/* Terminal CTA Block */}
+      <ScrollSection>
+        <div className="s8-cta-block">
+          <div className="s8-cta-heading">Your next step</div>
+          <div className="s8-cta-subheading">You&rsquo;ve seen the data. You&rsquo;ve seen the numbers. The only question left is <strong>when</strong>.</div>
+
+          {/* Rep Card */}
+          {(() => {
+            const selectedRep = reps.find(r => r.name === state.rep.name && r.photo_url)
+            if (!selectedRep) return null
+            return (
+              <div className="s8-rep-card">
+                <div className="s8-rep-photo">
+                  <img src={selectedRep.photo_url} alt={selectedRep.name} />
+                </div>
+                <div className="s8-rep-info">
+                  <div className="s8-rep-label">Your energy consultant</div>
+                  <div className="s8-rep-name">{selectedRep.name}</div>
+                  <div className="s8-rep-title">{selectedRep.title}</div>
+                </div>
+              </div>
+            )
+          })()}
+
+          {/* Action Buttons */}
+          <div className="s8-cta-actions">
+            <a href="#book" className="s8-cta-primary">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>
+              Book Your Installation Survey
+            </a>
+            {state.customer.email ? (
+              <a href={`mailto:${state.customer.email}?subject=Your%20Solar%20Proposal%20from%20Black%20Diamond%20Solar&body=Hi%20${state.customer.firstName || ''},%0A%0AHere%20is%20your%20personalised%20solar%20proposal%20from%20Black%20Diamond%20Solar.`} className="s8-cta-secondary">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>
+                Send to {state.customer.email}
+              </a>
+            ) : (
+              <EmailCapture firstName={state.customer.firstName} />
+            )}
+            <DownloadPdfButton state={state} />
+          </div>
+          {state.customer.phone && (
+            <div className="s8-cta-phone-note">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" /></svg>
+              Your rep will call <strong>{state.customer.phone}</strong> to discuss next steps
+            </div>
+          )}
+
+          {/* Next Steps Timeline */}
+          <div className="s8-next-steps">
+            <div className="s8-step">
+              <div className="s8-step-number">1</div>
+              <div className="s8-step-content">
+                <div className="s8-step-title">Site Survey</div>
+                <div className="s8-step-desc">We visit your home to finalise the design</div>
+              </div>
+            </div>
+            <div className="s8-step">
+              <div className="s8-step-number">2</div>
+              <div className="s8-step-content">
+                <div className="s8-step-title">Final Design</div>
+                <div className="s8-step-desc">Your system layout confirmed and approved</div>
+              </div>
+            </div>
+            <div className="s8-step">
+              <div className="s8-step-number">3</div>
+              <div className="s8-step-content">
+                <div className="s8-step-title">Installation</div>
+                <div className="s8-step-desc">Typical install: 1&ndash;2 days, fully operational</div>
+              </div>
+            </div>
+          </div>
+          <div className="s8-timeline-note">Most installations are completed within 4&ndash;6 weeks of approval.</div>
+          <ShareLink state={state} />
         </div>
       </ScrollSection>
     </div>

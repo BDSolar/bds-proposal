@@ -1,3 +1,4 @@
+import { useState, useRef } from 'react'
 import { useProposal } from '../context/ProposalContext'
 import { useReps } from '../hooks/useReps'
 import '../styles/sections/s0b.css'
@@ -30,7 +31,31 @@ export default function S0b_DataCapture() {
     dispatch({ type: 'UPDATE_CUSTOMER', payload: { [field]: !customer[field] } })
   }
 
+  const [errors, setErrors] = useState({})
+  const sessionRestored = useRef(customer.firstName !== '' || customer.dailyUsage !== '').current
+
   function handleSubmit() {
+    const newErrors = {}
+    const usage = parseFloat(customer.dailyUsage)
+    const tariff = parseFloat(customer.tariffRate)
+    const supply = parseFloat(customer.supplyCharge)
+
+    if (!customer.dailyUsage || isNaN(usage) || usage <= 0) {
+      newErrors.dailyUsage = 'Please enter your daily usage (found on your electricity bill)'
+    }
+    if (!customer.tariffRate || isNaN(tariff) || tariff <= 0) {
+      newErrors.tariffRate = 'Please enter your tariff rate (usually between $0.20 and $0.50 per kWh)'
+    }
+    if (!customer.supplyCharge || isNaN(supply) || supply <= 0) {
+      newErrors.supplyCharge = 'Please enter your daily supply charge (usually between $0.80 and $2.00)'
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      return
+    }
+
+    setErrors({})
     dispatch({ type: 'SUBMIT_FORM' })
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -48,6 +73,13 @@ export default function S0b_DataCapture() {
 
       <section className="scroll-section auto-height">
         <div className="section-inner form-visible">
+          {sessionRestored && (
+            <div className="form-session-banner">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 4v6h6M23 20v-6h-6" /><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15" /></svg>
+              <span>Previous session restored{customer.firstName ? ` for ${customer.firstName} ${customer.lastName}` : ''}.</span>
+              <button className="form-session-clear" onClick={() => dispatch({ type: 'RESET' })}>Start Fresh</button>
+            </div>
+          )}
           {/* Rep Details */}
           <div className="form-card accent-top">
             <div className="form-card-title">Your Details</div>
@@ -170,9 +202,11 @@ export default function S0b_DataCapture() {
               <div className="form-group">
                 <label className="form-label">Daily Usage</label>
                 <div className="input-with-unit">
-                  <input type="number" className="form-input" placeholder="e.g. 30" step="0.1" value={customer.dailyUsage} onChange={e => updateCustomer('dailyUsage', e.target.value)} />
+                  <input type="number" className={`form-input${errors.dailyUsage ? ' form-input-error' : ''}`} placeholder="e.g. 30" step="0.1" value={customer.dailyUsage} onChange={e => { updateCustomer('dailyUsage', e.target.value); setErrors(prev => ({ ...prev, dailyUsage: undefined })) }} />
                   <span className="input-unit">kWh/day</span>
                 </div>
+                <span className="form-helper">Found on page 2 of most bills as &lsquo;Average Daily Usage&rsquo;</span>
+                {errors.dailyUsage && <span className="form-error">{errors.dailyUsage}</span>}
               </div>
               <div className="form-group">
                 <label className="form-label">Quarterly Bill</label>
@@ -186,16 +220,44 @@ export default function S0b_DataCapture() {
               <div className="form-group">
                 <label className="form-label">Tariff Rate</label>
                 <div className="input-with-unit">
-                  <input type="number" className="form-input" placeholder="e.g. 0.32" step="0.01" value={customer.tariffRate} onChange={e => updateCustomer('tariffRate', e.target.value)} />
+                  <input type="number" className={`form-input${errors.tariffRate ? ' form-input-error' : ''}`} placeholder="e.g. 0.32" step="0.01" value={customer.tariffRate} onChange={e => { updateCustomer('tariffRate', e.target.value); setErrors(prev => ({ ...prev, tariffRate: undefined })) }} />
                   <span className="input-unit">$/kWh</span>
                 </div>
+                <span className="form-helper">Check your bill under &lsquo;Usage Charges&rsquo; or &lsquo;Tariff Rate&rsquo;</span>
+                {errors.tariffRate && <span className="form-error">{errors.tariffRate}</span>}
               </div>
               <div className="form-group">
                 <label className="form-label">Supply Charge</label>
                 <div className="input-with-unit">
-                  <input type="number" className="form-input" placeholder="e.g. 1.10" step="0.01" value={customer.supplyCharge} onChange={e => updateCustomer('supplyCharge', e.target.value)} />
+                  <input type="number" className={`form-input${errors.supplyCharge ? ' form-input-error' : ''}`} placeholder="e.g. 1.10" step="0.01" value={customer.supplyCharge} onChange={e => { updateCustomer('supplyCharge', e.target.value); setErrors(prev => ({ ...prev, supplyCharge: undefined })) }} />
                   <span className="input-unit">$/day</span>
                 </div>
+                <span className="form-helper">Listed as &lsquo;Service to Property&rsquo; or &lsquo;Daily Supply Charge&rsquo;</span>
+                {errors.supplyCharge && <span className="form-error">{errors.supplyCharge}</span>}
+              </div>
+            </div>
+            <div className="form-grid" style={{ marginBottom: 16 }}>
+              <div className="form-group">
+                <label className="form-label">Feed-in Tariff</label>
+                <div className="input-with-unit">
+                  <input type="number" className="form-input" placeholder="e.g. 0.07" step="0.01" value={customer.fitRate} onChange={e => updateCustomer('fitRate', e.target.value)} />
+                  <span className="input-unit">$/kWh</span>
+                </div>
+                <span className="form-helper">Your export rate. Leave blank for state default.</span>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Roof Orientation</label>
+                <select className="form-select" value={customer.roofOrientation} onChange={e => updateCustomer('roofOrientation', e.target.value)}>
+                  <option value="North">North (100%)</option>
+                  <option value="North-East">North-East (95%)</option>
+                  <option value="North-West">North-West (95%)</option>
+                  <option value="East">East (85%)</option>
+                  <option value="West">West (85%)</option>
+                  <option value="South-East">South-East (80%)</option>
+                  <option value="South-West">South-West (80%)</option>
+                  <option value="Mixed">Mixed / Split (90%)</option>
+                </select>
+                <span className="form-helper">Primary panel-facing direction</span>
               </div>
             </div>
             <div className="form-grid">

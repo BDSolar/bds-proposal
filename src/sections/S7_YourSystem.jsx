@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { useProposal } from '../context/ProposalContext'
 import Hero from '../components/Hero'
 import ScrollSection from '../components/ScrollSection'
+import TestimonialQuote from '../components/TestimonialQuote'
 import systemConfig from '../data/systemConfig'
 import '../styles/sections/s7.css'
 
@@ -31,9 +33,10 @@ export default function S7_YourSystem() {
   const { state } = useProposal()
   const er = state.engineResults
   const cfg = er ? buildCfgFromEngine(er) : systemConfig
+  const [showAllOptions, setShowAllOptions] = useState(false)
   return (
     <div>
-      <Hero badge="Section 07 — Your System" title="Meet your" highlightText="system" subtitle="Premium components, engineered to 150% of your usage. Here's exactly what powers your Bill-to-Zero home." />
+      <Hero badge="Section 07 — Your System" title="What powers your" highlightText="$0 bill" subtitle="Premium components, engineered to 150% of your usage. Here's exactly what powers your Bill-to-Zero home." />
 
       {/* Product Cards */}
       <ScrollSection>
@@ -61,6 +64,7 @@ export default function S7_YourSystem() {
               </div>
               <div className="s7-product-model">{cfg.system.panelModel} {cfg.system.panelSeries}</div>
             </div>
+            <div className="s7-product-narrative">We tested dozens of panels in QLD heat conditions. The LONGi X10 outperformed every competitor, producing 12% more energy above 35&deg;C thanks to its industry-leading &minus;0.26%/&deg;C temperature coefficient.</div>
             <div className="s7-product-illustration">
               {/* Two panels nearly touching with electric mist between them */}
               <svg viewBox="0 0 262 220" className="s7-panel-svg">
@@ -191,6 +195,20 @@ export default function S7_YourSystem() {
                 <span key={f} className="s7-feature-pill solar">{f}</span>
               ))}
             </div>
+            <div className="s7-install-quality">
+              <div className="s7-install-quality-item">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1L2 4v4.5c0 3.5 2.5 5.8 6 7 3.5-1.2 6-3.5 6-7V4L8 1z" stroke="#30d158" strokeWidth="1.2" fill="none"/><path d="M5.5 8l2 2 3.5-4" stroke="#30d158" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                <span>Mounting brackets rated for <strong>Category 5 cyclones</strong></span>
+              </div>
+              <div className="s7-install-quality-item">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1L2 4v4.5c0 3.5 2.5 5.8 6 7 3.5-1.2 6-3.5 6-7V4L8 1z" stroke="#30d158" strokeWidth="1.2" fill="none"/><path d="M5.5 8l2 2 3.5-4" stroke="#30d158" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                <span>Your existing <strong>roof warranty remains intact</strong></span>
+              </div>
+              <div className="s7-install-quality-item">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1L2 4v4.5c0 3.5 2.5 5.8 6 7 3.5-1.2 6-3.5 6-7V4L8 1z" stroke="#30d158" strokeWidth="1.2" fill="none"/><path d="M5.5 8l2 2 3.5-4" stroke="#30d158" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                <span>Installed by <strong>CEC-accredited Master Electricians</strong></span>
+              </div>
+            </div>
           </div>
 
           {/* Battery Card */}
@@ -201,6 +219,7 @@ export default function S7_YourSystem() {
               </div>
               <div className="s7-product-model">{cfg.battery.model}</div>
             </div>
+            <div className="s7-product-narrative">Sigenergy&rsquo;s AI-driven energy platform doesn&rsquo;t just store power &mdash; it learns your usage patterns and optimises every kWh. One box replaces your inverter, battery, EV charger, and energy manager.</div>
             <div className="s7-product-illustration">
               {(() => {
                 const modules = cfg.battery.modules || 4
@@ -338,75 +357,134 @@ export default function S7_YourSystem() {
             <p className="s7-warranty-sub">Performance &middot; Workmanship &middot; Monitoring &mdash; all covered</p>
           </div>
         </div>
+        <div className="s7-warranty-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Component</th>
+                <th>Warranty</th>
+                <th>Backed By</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Solar Panels &mdash; Product</td><td>{cfg.system.panelWarrantyProduct} years</td><td>{cfg.system.panelBrand}</td></tr>
+              <tr><td>Solar Panels &mdash; Performance</td><td>{cfg.system.panelWarrantyPerformance} years</td><td>{cfg.system.panelBrand}</td></tr>
+              <tr><td>Battery Modules</td><td>10 years</td><td>{cfg.battery.brand}</td></tr>
+              <tr><td>Energy Controller</td><td>10 years</td><td>{cfg.battery.brand}</td></tr>
+              <tr><td>BDS Workmanship</td><td>10 years</td><td>Black Diamond Solar</td></tr>
+              <tr className="s7-warranty-highlight"><td>Bill-to-Zero Guarantee</td><td>Lifetime</td><td>Black Diamond Solar</td></tr>
+            </tbody>
+          </table>
+        </div>
         </div>
       </ScrollSection>
 
       {/* System Options */}
-      {er?.options && (
+      {er?.options && (() => {
+        const recommended = er.options.find(o => o.coverageRatio === 1.5) || er.options[er.options.length - 1]
+        const others = er.options.filter(o => o !== recommended)
+
+        const renderCard = (opt, isRecommended) => (
+          <div key={opt.coveragePct} className={`s7-option-card${isRecommended ? ' recommended' : ''}`}>
+            {isRecommended && <div className="s7-option-recommended">Recommended</div>}
+            <div className="s7-option-badge">{opt.coveragePct}%</div>
+            <div className="s7-option-label">Coverage</div>
+
+            <div className="s7-option-price">${opt.systemPrice.toLocaleString()}</div>
+            <div className="s7-option-price-note">inc. GST, after rebates</div>
+            <div className="s7-option-weekly">That&rsquo;s ${Math.round(opt.systemPrice / 520)}/week over 10 years</div>
+            {isRecommended && <div className="s7-option-weekly-context">Less than most household power bills</div>}
+            <div className="s7-option-finance-note">Interest-free finance options available</div>
+
+            <div className="s7-option-stats">
+              <div className="s7-option-stat">
+                <span className="s7-option-stat-val">{opt.panelCount}</span>
+                <span className="s7-option-stat-label">Panels</span>
+              </div>
+              <div className="s7-option-stat">
+                <span className="s7-option-stat-val">{opt.arrayKw} kW</span>
+                <span className="s7-option-stat-label">Solar</span>
+              </div>
+              <div className="s7-option-stat">
+                <span className="s7-option-stat-val">{opt.batteryKwh} kWh</span>
+                <span className="s7-option-stat-label">Battery</span>
+              </div>
+            </div>
+
+            <div className="s7-option-divider" />
+
+            <div className="s7-option-annual">
+              <span className="s7-option-annual-label">{opt.zeroBill ? 'Annual bill' : 'Annual cost'}</span>
+              <span className={`s7-option-annual-val${opt.zeroBill ? ' zero' : ''}`}>
+                {opt.zeroBill ? '$0' : `$${opt.annualCost.toLocaleString()}`}
+              </span>
+            </div>
+
+            {opt.annualCredit > 0 && (
+              <div className="s7-option-credit">
+                <span className="s7-option-credit-label">Annual credit</span>
+                <span className="s7-option-credit-val">+${opt.annualCredit.toLocaleString()}</span>
+              </div>
+            )}
+
+            {opt.fitRevenue > 0 && (
+              <div className="s7-option-fit">
+                <span className="s7-option-fit-label">Export revenue</span>
+                <span className="s7-option-fit-val">${opt.fitRevenue.toLocaleString()}/yr</span>
+              </div>
+            )}
+
+            <div className="s7-option-payback">
+              <span className="s7-option-payback-label">Payback</span>
+              <span className="s7-option-payback-val">{opt.paybackYear} yrs</span>
+            </div>
+
+            {opt.zeroBill && <div className="s7-option-zero-badge">{opt.annualCredit > 0 ? `$0 Bill + $${opt.annualCredit.toLocaleString()} credit` : '$0 Bill'}</div>}
+          </div>
+        )
+
+        return (
+          <ScrollSection>
+            <div className="section-label">Your System</div>
+            <div className="s7-options-grid s7-options-single">
+              {renderCard(recommended, true)}
+            </div>
+            {others.length > 0 && (
+              <>
+                <button className="s7-options-toggle" onClick={() => setShowAllOptions(!showAllOptions)}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points={showAllOptions ? '18 15 12 9 6 15' : '6 9 12 15 18 9'} /></svg>
+                  {showAllOptions ? 'Hide other sizes' : 'Compare other system sizes'}
+                </button>
+                {showAllOptions && (
+                  <div className="s7-options-grid s7-options-others">
+                    {others.map(opt => renderCard(opt, false))}
+                  </div>
+                )}
+              </>
+            )}
+          </ScrollSection>
+        )
+      })()}
+
+      {er && er.stcRebate > 0 && (
         <ScrollSection>
-          <div className="section-label">System Options</div>
-          <div className="s7-options-grid">
-            {er.options.map((opt) => {
-              const isRecommended = opt.coverageRatio === 1.5
-              return (
-                <div key={opt.coveragePct} className={`s7-option-card${isRecommended ? ' recommended' : ''}`}>
-                  {isRecommended && <div className="s7-option-recommended">Recommended</div>}
-                  <div className="s7-option-badge">{opt.coveragePct}%</div>
-                  <div className="s7-option-label">Coverage</div>
-
-                  <div className="s7-option-price">${opt.systemPrice.toLocaleString()}</div>
-                  <div className="s7-option-price-note">inc. GST, after rebates</div>
-
-                  <div className="s7-option-stats">
-                    <div className="s7-option-stat">
-                      <span className="s7-option-stat-val">{opt.panelCount}</span>
-                      <span className="s7-option-stat-label">Panels</span>
-                    </div>
-                    <div className="s7-option-stat">
-                      <span className="s7-option-stat-val">{opt.arrayKw} kW</span>
-                      <span className="s7-option-stat-label">Solar</span>
-                    </div>
-                    <div className="s7-option-stat">
-                      <span className="s7-option-stat-val">{opt.batteryKwh} kWh</span>
-                      <span className="s7-option-stat-label">Battery</span>
-                    </div>
-                  </div>
-
-                  <div className="s7-option-divider" />
-
-                  <div className="s7-option-annual">
-                    <span className="s7-option-annual-label">{opt.zeroBill ? 'Annual bill' : 'Annual cost'}</span>
-                    <span className={`s7-option-annual-val${opt.zeroBill ? ' zero' : ''}`}>
-                      {opt.zeroBill ? '$0' : `$${opt.annualCost.toLocaleString()}`}
-                    </span>
-                  </div>
-
-                  {opt.annualCredit > 0 && (
-                    <div className="s7-option-credit">
-                      <span className="s7-option-credit-label">Annual credit</span>
-                      <span className="s7-option-credit-val">+${opt.annualCredit.toLocaleString()}</span>
-                    </div>
-                  )}
-
-                  {opt.fitRevenue > 0 && (
-                    <div className="s7-option-fit">
-                      <span className="s7-option-fit-label">Export revenue</span>
-                      <span className="s7-option-fit-val">${opt.fitRevenue.toLocaleString()}/yr</span>
-                    </div>
-                  )}
-
-                  <div className="s7-option-payback">
-                    <span className="s7-option-payback-label">Payback</span>
-                    <span className="s7-option-payback-val">{opt.paybackYear} yrs</span>
-                  </div>
-
-                  {opt.zeroBill && <div className="s7-option-zero-badge">{opt.annualCredit > 0 ? `$0 Bill + $${opt.annualCredit.toLocaleString()} credit` : '$0 Bill'}</div>}
-                </div>
-              )
-            })}
+          <div className="s7-stc-urgency">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L1 18h18L10 2z" stroke="#f5a623" strokeWidth="1.5" fill="none"/><path d="M10 8v4M10 14v1" stroke="#f5a623" strokeWidth="1.5" strokeLinecap="round"/></svg>
+            <div className="s7-stc-urgency-text">
+              <strong>The government&rsquo;s STC rebate reduces every January.</strong> Your current rebate saves <span className="s7-stc-amount">${er.stcRebate.toLocaleString()}</span>. Next year, that drops by <span className="s7-stc-drop">${Math.round(er.stcRebate / 5).toLocaleString()}</span>. Every year you wait costs you in rising bills <em>and</em> shrinking rebates.
+            </div>
           </div>
         </ScrollSection>
       )}
+
+      <ScrollSection>
+        <TestimonialQuote
+          quote="Best investment we've made for our home. The system paid for itself in under 4 years."
+          name="Michael T."
+          location="Carindale"
+          system="10 kW system + 16 kWh battery"
+        />
+      </ScrollSection>
 
       {/* Guarantee */}
       <ScrollSection>

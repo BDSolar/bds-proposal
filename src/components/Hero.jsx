@@ -16,7 +16,7 @@ export default function Hero({ badge, title, highlightText, subtitle, children }
       </h1>
       {subtitle && <p className="hero-sub">{subtitle}</p>}
       {children}
-      <div className="scroll-cue">
+      <div className="scroll-cue" aria-hidden="true">
         <span>Scroll</span>
         <div className="arrow"></div>
       </div>

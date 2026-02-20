@@ -25,8 +25,8 @@ export default function S0_AboutUs() {
     <div>
       <Hero
         badge="About Us"
-        title="Experience You Can Trust,"
-        highlightText="Service You Deserve."
+        title="16,000 homes. One"
+        highlightText="guarantee."
         subtitle="16,000+ installs. 30+ years combined experience. Australia's first and only Zero Bill Guarantee."
       >
         <div className="stats-bar">
@@ -134,6 +134,26 @@ export default function S0_AboutUs() {
             <div className="accred-name">Smart Energy</div>
             <div className="accred-detail">GMS Member</div>
           </div>
+          <div className="accred-card">
+            <div className="accred-logo accred-logo-inline">
+              <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+                <rect x="2" y="2" width="32" height="32" rx="6" stroke="#f5a623" strokeWidth="1.5" fill="none"/>
+                <path d="M18 8l2.5 5 5.5.8-4 3.9.9 5.3L18 20.5 13.1 23l.9-5.3-4-3.9 5.5-.8L18 8z" fill="#f5a623"/>
+              </svg>
+            </div>
+            <div className="accred-name">Google Reviews</div>
+            <div className="accred-detail">4.8 &#9733; &middot; 500+ Reviews</div>
+          </div>
+          <div className="accred-card">
+            <div className="accred-logo accred-logo-inline">
+              <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+                <circle cx="18" cy="18" r="15" stroke="#30d158" strokeWidth="1.5" fill="none"/>
+                <path d="M12 18l4 4 8-8" stroke="#30d158" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <div className="accred-name">SolarQuotes</div>
+            <div className="accred-detail">Verified Installer</div>
+          </div>
         </div>
       </ScrollSection>
 
@@ -141,7 +161,7 @@ export default function S0_AboutUs() {
       <ScrollSection>
         <div className="section-label">Testimonials</div>
         <div className="testimonial-video">
-          <video controls preload="metadata" poster="">
+          <video controls preload="metadata" poster="./adam-reynolds-poster.jpg">
             <source src="./adam-reynolds.mp4" type="video/mp4" />
           </video>
           <div className="testimonial-name">Adam Reynolds</div>

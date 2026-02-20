@@ -1,0 +1,30 @@
+/* Testimonial Pull Quote */
+.testimonial-quote {
+  padding: 24px 28px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--separator);
+  border-left: 3px solid var(--green);
+  border-radius: var(--radius-md);
+  margin: 24px 0;
+}
+.testimonial-quote-text {
+  font-size: clamp(0.95rem, 2vw, 1.1rem);
+  font-weight: 300;
+  font-style: italic;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+.testimonial-quote-attr {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  letter-spacing: 0.5px;
+}
+.testimonial-quote-attr strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.testimonial-quote-system {
+  color: var(--text-quaternary);
+}

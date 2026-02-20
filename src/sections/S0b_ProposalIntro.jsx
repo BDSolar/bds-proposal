@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useProposal } from '../context/ProposalContext'
 import ScrollSection from '../components/ScrollSection'
 import '../styles/sections/s0b.css'
@@ -17,9 +18,57 @@ function SmallDiamond() {
   )
 }
 
+function InlineEditPanel({ customer, dispatch, onClose }) {
+  const [fields, setFields] = useState({
+    dailyUsage: customer.dailyUsage,
+    tariffRate: customer.tariffRate,
+    supplyCharge: customer.supplyCharge,
+    quarterlyBill: customer.quarterlyBill,
+  })
+
+  function handleSave() {
+    dispatch({ type: 'INLINE_RECALCULATE', payload: fields })
+    onClose()
+  }
+
+  return (
+    <div className="inline-edit-overlay" onClick={onClose}>
+      <div className="inline-edit-panel" onClick={e => e.stopPropagation()}>
+        <div className="inline-edit-header">
+          <div className="inline-edit-title">Edit Energy Details</div>
+          <button className="inline-edit-close" onClick={onClose}>&times;</button>
+        </div>
+        <div className="inline-edit-fields">
+          <div className="inline-edit-field">
+            <label>Daily Usage (kWh/day)</label>
+            <input type="number" step="0.1" value={fields.dailyUsage} onChange={e => setFields(f => ({ ...f, dailyUsage: e.target.value }))} />
+          </div>
+          <div className="inline-edit-field">
+            <label>Tariff Rate ($/kWh)</label>
+            <input type="number" step="0.01" value={fields.tariffRate} onChange={e => setFields(f => ({ ...f, tariffRate: e.target.value }))} />
+          </div>
+          <div className="inline-edit-field">
+            <label>Supply Charge ($/day)</label>
+            <input type="number" step="0.01" value={fields.supplyCharge} onChange={e => setFields(f => ({ ...f, supplyCharge: e.target.value }))} />
+          </div>
+          <div className="inline-edit-field">
+            <label>Quarterly Bill ($)</label>
+            <input type="number" step="1" value={fields.quarterlyBill} onChange={e => setFields(f => ({ ...f, quarterlyBill: e.target.value }))} />
+          </div>
+        </div>
+        <div className="inline-edit-actions">
+          <button className="inline-edit-cancel" onClick={onClose}>Cancel</button>
+          <button className="inline-edit-save" onClick={handleSave}>Recalculate</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function S0b_ProposalIntro() {
   const { state, dispatch } = useProposal()
   const { customer, rep, proposal } = state
+  const [editing, setEditing] = useState(false)
 
   const fullName = `${customer.firstName} ${customer.lastName}`.trim() || 'Customer'
   const initials = `${(customer.firstName?.[0] || '').toUpperCase()}${(customer.lastName?.[0] || '').toUpperCase()}`
@@ -60,7 +109,7 @@ export default function S0b_ProposalIntro() {
         <div className="details-block">
           <div className="profile-layout">
             <div className="profile-card">
-              <button className="edit-btn" onClick={() => dispatch({ type: 'EDIT_FORM' })}>&#9998; Edit</button>
+              <button className="edit-btn" onClick={() => setEditing(true)}>&#9998; Edit</button>
               <div className="profile-card-name">{fullName}</div>
               <div className="profile-card-address">{addressLine}</div>
               <div className="profile-card-divider" />
@@ -236,6 +285,7 @@ export default function S0b_ProposalIntro() {
           </p>
         </div>
       </ScrollSection>
+      {editing && <InlineEditPanel customer={customer} dispatch={dispatch} onClose={() => setEditing(false)} />}
     </div>
   )
 }

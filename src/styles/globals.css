@@ -160,3 +160,35 @@ body { font-family: 'Outfit', sans-serif; background: var(--bg-primary); color: 
   padding-top: 0;
   padding-bottom: 100px;
 }
+
+/* --- Reduced motion --- */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .section-inner { opacity: 1; transform: none; }
+  .hero-logo, .hero-label, .hero h1, .hero-sub, .scroll-cue { opacity: 1; animation: none; }
+  .stagger-in > * { opacity: 1; transform: none; }
+}
+
+/* --- Skip link --- */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 20px;
+  background: var(--accent);
+  color: white;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  z-index: 10000;
+  text-decoration: none;
+}
+.skip-link:focus {
+  top: 12px;
+}

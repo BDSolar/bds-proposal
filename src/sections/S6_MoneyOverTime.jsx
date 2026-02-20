@@ -110,10 +110,18 @@ export default function S6_MoneyOverTime() {
   // $0 horizontal line position
   const zeroY = yPos(0)
 
-  // Break-even position
-  const beIdx = breakevenYear - 1
-  const beX = xPos(beIdx)
-  const beY = yPos(data[beIdx]?.gridCumulative || 0)
+  // Break-even: exact point where green line crosses $0 (interpolated)
+  const breakeven = useMemo(() => {
+    for (let i = 0; i < greenData.length - 1; i++) {
+      if (greenData[i] >= 0 && greenData[i + 1] < 0) {
+        const t = greenData[i] / (greenData[i] - greenData[i + 1])
+        return { x: i + t, year: Math.round(i + t + 1) }
+      }
+    }
+    return { x: breakevenYear - 1, year: breakevenYear }
+  }, [greenData, breakevenYear])
+  const beX = xPos(breakeven.x)
+  const beY = yPos(0)
 
   // End-of-line labels
   const lastGrid = data[data.length - 1].gridCumulative
@@ -177,7 +185,7 @@ export default function S6_MoneyOverTime() {
 
                     {/* Break-even label pill */}
                     <rect x={beX - 65} y={padT - 4} width="130" height="24" rx="4" fill="rgba(48,209,88,0.15)" stroke="rgba(48,209,88,0.3)" strokeWidth="1" />
-                    <text x={beX} y={padT + 12} fontFamily="'JetBrains Mono', monospace" fontSize="10" fill="#30d158" textAnchor="middle" fontWeight="600">Break Even: Year {breakevenYear}</text>
+                    <text x={beX} y={padT + 12} fontFamily="'JetBrains Mono', monospace" fontSize="10" fill="#30d158" textAnchor="middle" fontWeight="600">Break Even: Year {breakeven.year}</text>
 
                     {/* End-of-line value labels */}
                     <text x={lastX + 8} y={yPos(lastGrid) + 4} fontFamily="'JetBrains Mono', monospace" fontSize="11" fill="#ff453a" fontWeight="700">${(lastGrid / 1000).toFixed(0)}k</text>

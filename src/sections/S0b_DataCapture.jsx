@@ -1,4 +1,5 @@
 import { useProposal } from '../context/ProposalContext'
+import { useReps } from '../hooks/useReps'
 import '../styles/sections/s0b.css'
 
 function SmallDiamond() {
@@ -19,6 +20,7 @@ function SmallDiamond() {
 export default function S0b_DataCapture() {
   const { state, dispatch } = useProposal()
   const { customer, rep, proposal } = state
+  const { reps, loading: repsLoading } = useReps()
 
   function updateCustomer(field, value) {
     dispatch({ type: 'UPDATE_CUSTOMER', payload: { [field]: value } })
@@ -53,13 +55,22 @@ export default function S0b_DataCapture() {
             <div className="form-grid">
               <div className="form-group">
                 <label className="form-label">Rep Name</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="e.g. Dean Iossifides"
+                <select
+                  className="form-select"
                   value={rep.name}
                   onChange={e => dispatch({ type: 'UPDATE_REP', payload: { name: e.target.value } })}
-                />
+                >
+                  {repsLoading ? (
+                    <option disabled>Loading...</option>
+                  ) : (
+                    <>
+                      <option value="" disabled>Select rep...</option>
+                      {reps.map(r => (
+                        <option key={r.id} value={r.name}>{r.name}</option>
+                      ))}
+                    </>
+                  )}
+                </select>
               </div>
               <div className="form-group">
                 <label className="form-label">Proposal Date</label>

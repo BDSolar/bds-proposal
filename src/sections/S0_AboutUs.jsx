@@ -1,8 +1,26 @@
 import Hero from '../components/Hero'
 import ScrollSection from '../components/ScrollSection'
+import { useProposal } from '../context/ProposalContext'
+import { useReps } from '../hooks/useReps'
 import '../styles/sections/s0.css'
 
+const TOM = {
+  name: 'Tom Cooper',
+  photo: './tom.png',
+  role: 'Technical Director',
+  desc: 'Unmatched technical expertise. Every system designed and installed for peak efficiency, reliability, and long-term performance.',
+  stat: 'Since 2009 \u00b7 Tier 1 Engineer',
+}
+
 export default function S0_AboutUs() {
+  const { state } = useProposal()
+  const { reps } = useReps()
+
+  const selectedRep = reps.find(r => r.name === state.rep.name && r.photo_url)
+  const rightCard = selectedRep
+    ? { name: selectedRep.name, photo: selectedRep.photo_url, role: selectedRep.title, desc: selectedRep.bio, stat: selectedRep.stat_text }
+    : TOM
+
   return (
     <div>
       <Hero
@@ -48,14 +66,12 @@ export default function S0_AboutUs() {
           </div>
           <div className="founder-card">
             <div className="founder-photo">
-              <img src="./tom.png" alt="Tom Cooper" />
+              <img src={rightCard.photo} alt={rightCard.name} />
             </div>
-            <div className="founder-name">Tom Cooper</div>
-            <div className="founder-role">Technical Director</div>
-            <div className="founder-desc">
-              Unmatched technical expertise. Every system designed and installed for peak efficiency, reliability, and long-term performance.
-            </div>
-            <div className="founder-stat">Since 2009 &middot; Tier 1 Engineer</div>
+            <div className="founder-name">{rightCard.name}</div>
+            <div className="founder-role">{rightCard.role}</div>
+            <div className="founder-desc">{rightCard.desc}</div>
+            <div className="founder-stat">{rightCard.stat}</div>
           </div>
         </div>
         <div className="founder-message">

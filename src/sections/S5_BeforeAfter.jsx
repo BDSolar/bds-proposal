@@ -165,20 +165,6 @@ export default function S5_BeforeAfter() {
       <ScrollSection>
         <div className="section-label">Scenario Comparison</div>
 
-        {/* Toggle tabs */}
-        <div className="s5-tabs">
-          {scenarioTabs.map(tab => (
-            <button
-              key={tab.id}
-              className={`s5-tab${scenario === tab.id ? ' active' : ''}`}
-              style={{ '--tab-color': tab.color }}
-              onClick={() => setScenario(tab.id)}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
         {/* Chart */}
         <div className="s5-chart-container">
           <div className="chart-header">
@@ -247,25 +233,54 @@ export default function S5_BeforeAfter() {
             </div>
             <div className="s5-cost-label">/day &middot; {current.annualCost < 0 ? `-$${Math.abs(current.annualCost).toLocaleString()}` : `$${current.annualCost.toLocaleString()}`}/year</div>
           </div>
-        </div>
-      </ScrollSection>
 
-      {/* Comparison metrics */}
-      <ScrollSection>
-        <div className="s5-metric-grid">
-          {[
-            { label: 'Grid Only', ...metrics.noSolar, cls: 'red' },
-            { label: 'Solar Only', ...metrics.solarOnly, cls: 'solar' },
-            { label: 'Solar + Battery', ...metrics.solarBattery, cls: 'green' },
-          ].map(s => (
-            <div key={s.label} className={`s5-metric-card ${s.cls}-border`}>
-              <div className="s5-metric-label">{s.label}</div>
-              <div className="s5-metric-row"><span>Grid Import</span><span>{s.gridImport.toFixed(1)} kWh</span></div>
-              <div className="s5-metric-row"><span>Self-powered</span><span>{s.scPct}%</span></div>
-              <div className="s5-metric-row"><span>Daily Cost</span><span className={s.cls}>{s.dailyCost < 0 ? `-$${Math.abs(s.dailyCost).toFixed(2)}` : `$${s.dailyCost.toFixed(2)}`}</span></div>
-              <div className="s5-metric-row"><span>Annual Cost</span><span className={s.cls}>{s.annualCost < 0 ? `-$${Math.abs(s.annualCost).toLocaleString()}` : `$${s.annualCost.toLocaleString()}`}</span></div>
+          {/* Scenario comparison cards */}
+          <div className="s5-scenario-grid">
+          {/* Grid Only */}
+          <div className={`s5-scenario-card s5-card-red${scenario === 'no-solar' ? ' active' : ''}`} onClick={() => setScenario('no-solar')}>
+            <div className="s5-card-header">
+              <div className="s5-icon-wrap red">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>
+              </div>
+              <div className="s5-card-title">Grid Only</div>
             </div>
-          ))}
+            <div className="s5-card-rows">
+              <div className="s5-row"><span className="s5-row-label">Annual Cost</span><span className="s5-row-value red">${metrics.noSolar.annualCost.toLocaleString()}</span></div>
+              <div className="s5-row"><span className="s5-row-label">Daily Cost</span><span className="s5-row-value red">${metrics.noSolar.dailyCost.toFixed(2)}/day</span></div>
+              <div className="s5-row"><span className="s5-row-label">Self-Powered</span><span className="s5-row-value red">{metrics.noSolar.scPct}%</span></div>
+            </div>
+          </div>
+
+          {/* Solar Only */}
+          <div className={`s5-scenario-card s5-card-solar${scenario === 'solar-only' ? ' active' : ''}`} onClick={() => setScenario('solar-only')}>
+            <div className="s5-card-header">
+              <div className="s5-icon-wrap solar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" /></svg>
+              </div>
+              <div className="s5-card-title">Solar Only</div>
+            </div>
+            <div className="s5-card-rows">
+              <div className="s5-row"><span className="s5-row-label">Annual Cost</span><span className="s5-row-value solar">${metrics.solarOnly.annualCost.toLocaleString()}</span></div>
+              <div className="s5-row"><span className="s5-row-label">Daily Cost</span><span className="s5-row-value solar">${metrics.solarOnly.dailyCost.toFixed(2)}/day</span></div>
+              <div className="s5-row"><span className="s5-row-label">Self-Powered</span><span className="s5-row-value solar">{metrics.solarOnly.scPct}%</span></div>
+            </div>
+          </div>
+
+          {/* Solar + Battery */}
+          <div className={`s5-scenario-card s5-card-green${scenario === 'solar-battery' ? ' active' : ''}`} onClick={() => setScenario('solar-battery')}>
+            <div className="s5-card-header">
+              <div className="s5-icon-wrap green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="7" width="12" height="14" rx="2" /><path d="M10 7V5a2 2 0 0 1 4 0v2" /><path d="M12 12v4M10 14h4" /></svg>
+              </div>
+              <div className="s5-card-title">Solar + Battery</div>
+            </div>
+            <div className="s5-card-rows">
+              <div className="s5-row"><span className="s5-row-label">Annual Cost</span><span className="s5-row-value green">{metrics.solarBattery.annualCost <= 0 ? '$0' : `$${metrics.solarBattery.annualCost.toLocaleString()}`}</span></div>
+              <div className="s5-row"><span className="s5-row-label">Daily Credit</span><span className="s5-row-value green">{metrics.solarBattery.dailyCost < 0 ? `+$${Math.abs(metrics.solarBattery.dailyCost).toFixed(2)}/day` : `$${metrics.solarBattery.dailyCost.toFixed(2)}/day`}</span></div>
+              <div className="s5-row"><span className="s5-row-label">Self-Powered</span><span className="s5-row-value green">{metrics.solarBattery.scPct}%</span></div>
+            </div>
+          </div>
+        </div>
         </div>
       </ScrollSection>
 

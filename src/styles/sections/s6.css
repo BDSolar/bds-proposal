@@ -6,7 +6,7 @@
   background: var(--bg-secondary);
   border: 1px solid var(--separator);
   border-radius: var(--radius-lg);
-  padding: 32px 24px 20px;
+  padding: 32px 28px 24px;
   position: relative;
   overflow: hidden;
 }
@@ -19,16 +19,33 @@
   opacity: 0.5;
 }
 
-.s6-chart-area { position: relative; width: 100%; aspect-ratio: 1000 / 400; }
+.s6-chart-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+.s6-chart-subtitle {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 20px;
+}
+
+.s6-chart-area { position: relative; width: 100%; aspect-ratio: 1000 / 500; }
 .s6-chart-area .chart-svg { width: 100%; height: 100%; }
 
+/* Line draw animation */
 .s6-line-animate {
-  stroke-dasharray: 2000;
-  stroke-dashoffset: 2000;
-  animation: s6Draw 2s ease forwards;
+  stroke-dasharray: 2500;
+  stroke-dashoffset: 2500;
+  animation: s6Draw 2.5s ease forwards;
 }
 @keyframes s6Draw { to { stroke-dashoffset: 0; } }
 
+/* Break-even pulse */
 .s6-pulse {
   animation: s6Pulse 2s ease-in-out infinite;
 }
@@ -37,23 +54,47 @@
   50% { opacity: 0.6; r: 9; }
 }
 
+/* Legend */
+.s6-legend {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  padding-top: 16px;
+}
+
 /* Stats */
 .s6-stats-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
+  margin-top: 32px;
 }
 .s6-stat-card {
   background: var(--bg-secondary);
   border: 1px solid var(--separator);
   border-radius: var(--radius-lg);
-  padding: 24px;
+  padding: 28px 20px;
   text-align: center;
   transition: transform 0.3s ease, border-color 0.3s ease;
 }
 .s6-stat-card:hover {
   transform: translateY(-2px);
   border-color: rgba(224, 0, 240, 0.15);
+}
+.s6-stat-card .stat-value {
+  font-size: 2.2rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+.s6-stat-card .stat-value.white { color: var(--text-primary); }
+.s6-stat-card .stat-value.accent { color: var(--accent); }
+.s6-stat-card .stat-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
 }
 
 /* Savings counter section */
@@ -87,7 +128,8 @@
 .s6-savings-context .red { color: var(--red); font-weight: 600; }
 .s6-savings-context .green { color: var(--green); font-weight: 600; }
 
-@media (max-width: 640px) {
+@media (max-width: 700px) {
   .s6-chart-container { padding: 24px 16px 16px; }
   .s6-stats-row { grid-template-columns: 1fr 1fr; }
+  .s6-stat-card .stat-value { font-size: 1.6rem; }
 }

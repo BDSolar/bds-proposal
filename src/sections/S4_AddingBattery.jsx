@@ -160,7 +160,33 @@ export default function S4_AddingBattery() {
               <stop offset="0%" stopColor="#ff453a" stopOpacity="0.15" />
               <stop offset="100%" stopColor="#ff453a" stopOpacity="0.02" />
             </linearGradient>
+            <linearGradient id="gradDaylight" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#f5a623" stopOpacity="0.08" />
+              <stop offset="100%" stopColor="#f5a623" stopOpacity="0.01" />
+            </linearGradient>
+            <radialGradient id="sunGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#f5a623" stopOpacity="0.15" />
+              <stop offset="70%" stopColor="#f5a623" stopOpacity="0.04" />
+              <stop offset="100%" stopColor="#f5a623" stopOpacity="0" />
+            </radialGradient>
           </defs>
+
+          {/* Daytime highlight band */}
+          <rect x={xPos(6)} y={padT} width={xPos(18) - xPos(6)} height={chartH} fill="url(#gradDaylight)" />
+          <line x1={xPos(6)} y1={padT} x2={xPos(6)} y2={padT + chartH} stroke="#f5a623" strokeWidth="0.5" opacity="0.15" />
+          <line x1={xPos(18)} y1={padT} x2={xPos(18)} y2={padT + chartH} stroke="#f5a623" strokeWidth="0.5" opacity="0.15" />
+
+          {/* Sun icon */}
+          <circle cx={xPos(12)} cy={padT + 36} r="28" fill="url(#sunGlow)" />
+          <circle cx={xPos(12)} cy={padT + 36} r="8" fill="none" stroke="#f5a623" strokeWidth="1.2" opacity="0.3" />
+          {[0, 45, 90, 135, 180, 225, 270, 315].map(angle => {
+            const rad = (angle * Math.PI) / 180
+            const x1 = xPos(12) + Math.cos(rad) * 12
+            const y1 = padT + 36 + Math.sin(rad) * 12
+            const x2 = xPos(12) + Math.cos(rad) * 17
+            const y2 = padT + 36 + Math.sin(rad) * 17
+            return <line key={angle} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#f5a623" strokeWidth="1" opacity="0.25" strokeLinecap="round" />
+          })}
 
           {gridLines.map((gl, i) => (
             <g key={i}>
